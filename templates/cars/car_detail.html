@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ car.brand }} {{ car.model }} {{ car.year }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'cars:catalog' %}">&larr; Ко всем автомобилям</a>
+
+<h1>{{ car.brand }} {{ car.model }} {{ car.year }}</h1>
+
+{% if car.status != 'for_sale' %}
+<p><strong>{{ car.get_status_display }}</strong></p>
+{% endif %}
+
+<div>
+    {% for image in car.images.all %}
+    <img src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }}" style="max-width: 100%;">
+    {% endfor %}
+</div>
+
+<p><strong>{{ car.price }} {{ car.dealer.currency }}</strong></p>
+
+<ul>
+    <li>Год: {{ car.year }}</li>
+    <li>Пробег: {{ car.mileage_km }} км</li>
+    <li>Топливо: {{ car.get_fuel_display }}</li>
+    <li>Коробка: {{ car.get_transmission_display }}</li>
+    {% if car.engine_capacity %}<li>Объём двигателя: {{ car.engine_capacity }} л</li>{% endif %}
+    <li>Мощность: {{ car.power_hp }} л.с.</li>
+    <li>Привод: {{ car.get_drive_display }}</li>
+    <li>Кузов: {{ car.get_body_display }}</li>
+    {% if car.vin %}<li>VIN: {{ car.vin }}</li>{% endif %}
+</ul>
+
+{% if car.description %}
+<p>{{ car.description }}</p>
+{% endif %}
+
+<p>
+    <a href="tel:{{ car.dealer.phone }}">Позвонить</a>
+    {% if car.dealer.telegram %}
+    <a href="https://t.me/{{ car.dealer.telegram|cut:'@' }}">Написать в Telegram</a>
+    {% endif %}
+</p>
+
+<p><em>Форма записи на просмотр появится на следующем этапе.</em></p>
+{% endblock %}
