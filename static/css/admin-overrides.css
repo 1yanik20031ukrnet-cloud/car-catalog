@@ -1,0 +1,66 @@
+/* Admin-only overrides for the django-unfold theme.
+   Loaded after unfold's own stylesheet (see UNFOLD['STYLES'] in
+   settings.py). Not inside any @layer, so these variables win over
+   unfold's @layer theme rules regardless of load order.
+
+   Unfold's default error/required-field color is Tailwind's stock
+   "red", which is quite saturated. This keeps the same hue and
+   lightness (still clearly reads as "error") but lowers the chroma
+   so it's easier on the eyes. */
+
+:root,
+:host {
+    --color-red-300: oklch(80.8% .05 19.571);
+    --color-red-500: oklch(63.7% .10 25.331);
+    --color-red-600: oklch(57.7% .11 27.325);
+}
+
+/* Car photos: "Обложка" (cover) badge on the already-uploaded photo
+   that is currently first — the one used as the catalog thumbnail.
+   django-unfold's drag-and-drop sorting (alpine.sort.js) actually
+   moves the row elements in the page, so a plain :first-of-type rule
+   is enough to keep the badge on the right photo while dragging —
+   no extra JS needed to track it. */
+.photo-preview-cell {
+    position: relative;
+    display: inline-block;
+}
+
+.cover-badge {
+    display: none;
+    position: absolute;
+    left: 2px;
+    bottom: 2px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: #eafff1;
+    background: oklch(44% .05 254 / 90%);
+}
+
+table.formset tbody.form-group:first-of-type .cover-badge {
+    display: inline-block;
+}
+
+/* Instant client-side preview of newly picked (not yet uploaded)
+   photos — see cars/static/cars/admin_photos.js. */
+.photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.photos-preview:empty {
+    margin-top: 0;
+}
+
+.photos-preview img {
+    height: 70px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid oklch(37% .045 254);
+}

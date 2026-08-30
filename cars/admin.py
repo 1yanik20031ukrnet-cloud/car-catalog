@@ -1,16 +1,30 @@
 from django import forms
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
+from unfold.widgets import UnfoldAdminTextInputWidget
 
-from .models import Booking, Car, CarImage, Dealer
+from .models import Booking, Car, CarImage, COMMON_CAR_BRANDS, Dealer
 
 
 class MultipleFileInput(forms.ClearableFileInput):
-    """File input that lets the user pick several files at once."""
+    """File input that lets the user pick several files at once.
+
+    Also renders an empty container right after itself; admin_photos.js
+    fills it with instant thumbnail previews of the picked files (pure
+    client-side, nothing is uploaded until the form is actually saved).
+    """
 
     allow_multiple_selected = True
+
+    def render(self, name, value, attrs=None, renderer=None):
+        html = super().render(name, value, attrs, renderer)
+        preview = format_html(
+            '<div id="{}-preview" class="photos-preview"></div>', f'id_{name}',
+        )
+        return mark_safe(f'{html}{preview}')
 
 
 class MultipleFileField(forms.FileField):
@@ -25,6 +39,34 @@ class MultipleFileField(forms.FileField):
         if not isinstance(data, (list, tuple)):
             data = [data] if data else []
         return [single_clean(item, initial) for item in data if item]
+
+
+class BrandInput(UnfoldAdminTextInputWidget):
+    """Text input with a <datalist> of brand suggestions.
+
+    Still a plain text field — a brand not in the list can be typed
+    too — the datalist just makes the browser suggest matches as the
+    person types, so existing brands stay spelled consistently.
+    """
+
+    def __init__(self, options=(), attrs=None):
+        super().__init__(attrs)
+        self.options = options
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['widget']['attrs']['list'] = f'{name}-datalist'
+        return context
+
+    def render(self, name, value, attrs=None, renderer=None):
+        html = super().render(name, value, attrs, renderer)
+        options_html = format_html_join(
+            '', '<option value="{}">', ((option,) for option in self.options),
+        )
+        datalist_html = format_html(
+            '<datalist id="{}">{}</datalist>', f'{name}-datalist', options_html,
+        )
+        return mark_safe(f'{html}{datalist_html}')
 
 
 class CarAdminForm(forms.ModelForm):
@@ -44,29 +86,70 @@ class CarAdminForm(forms.ModelForm):
         model = Car
         fields = '__all__'
 
+    class Media:
+        js = ['cars/admin_photos.js']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        existing_brands = (
+            Car.objects.exclude(brand='').values_list('brand', flat=True).distinct()
+        )
+        brand_options = sorted(
+            set(COMMON_CAR_BRANDS) | set(existing_brands), key=str.casefold,
+        )
+        self.fields['brand'].widget = BrandInput(
+            options=brand_options, attrs=self.fields['brand'].widget.attrs,
+        )
+
 
 @admin.register(Dealer)
 class DealerAdmin(ModelAdmin):
     list_display = ['name', 'phone', 'currency']
 
 
+class CarImageInlineForm(forms.ModelForm):
+    """Hides the raw image widget — replacing files happens by deleting
+    a photo here and adding a new one through the top upload field, not
+    by editing this row's file path in place."""
+
+    class Meta:
+        model = CarImage
+        fields = ['image', 'order']
+        widgets = {'image': forms.HiddenInput()}
+
+
 class CarImageInline(TabularInline):
-    """Photos already uploaded: reorder, replace or delete them."""
+    """Photos already uploaded: drag to reorder, or delete.
+
+    Adding new photos happens through the 'Загрузить фотографии' field
+    above, so this inline never offers its own 'add another' row.
+    Dragging a row is handled entirely by django-unfold's built-in
+    sortable inlines (ordering_field) — no custom JS needed for that.
+    """
 
     model = CarImage
+    form = CarImageInlineForm
     extra = 0
-    verbose_name_plural = 'Уже загруженные фотографии'
+    verbose_name_plural = 'Уже загруженные фотографии — перетащите, чтобы поменять порядок'
     fields = ['preview', 'image', 'order']
     readonly_fields = ['preview']
+    ordering_field = 'order'
+    hide_ordering_field = True
 
-    @admin.display(description='Превью')
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='')
     def preview(self, obj):
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="height:60px;border-radius:4px;">',
-                obj.image.url,
-            )
-        return '—'
+        if not obj.image:
+            return '—'
+        return format_html(
+            '<div class="photo-preview-cell">'
+            '<img src="{}" style="height:70px;border-radius:4px;">'
+            '<span class="cover-badge">Обложка</span>'
+            '</div>',
+            obj.image.url,
+        )
 
 
 @admin.register(Car)

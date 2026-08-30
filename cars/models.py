@@ -1,6 +1,17 @@
 from django.db import models
 from django.utils.text import slugify
 
+# Подсказки марок для админки (автодополнение) и будущего фильтра
+# в каталоге. Марка у Car остаётся обычным текстовым полем — этот
+# список только подсказывает, ввести можно и марку не из списка.
+COMMON_CAR_BRANDS = (
+    'Audi', 'BMW', 'Mercedes-Benz', 'Volkswagen', 'Porsche', 'Volvo',
+    'Toyota', 'Lexus', 'Honda', 'Mazda', 'Nissan', 'Mitsubishi',
+    'Subaru', 'Suzuki', 'Hyundai', 'Kia', 'Ford', 'Opel', 'Chevrolet',
+    'Jeep', 'Tesla', 'Škoda', 'Renault', 'Peugeot', 'Citroën', 'Fiat',
+    'Seat', 'Land Rover', 'Jaguar', 'Mini', 'Bentley',
+)
+
 
 class Dealer(models.Model):
     """Автосалон. Пока одна запись, но структура готова к нескольким."""
