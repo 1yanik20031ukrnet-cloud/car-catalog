@@ -85,6 +85,10 @@ class Car(models.Model):
     body = models.CharField('Кузов', max_length=10, choices=Body.choices)
     vin = models.CharField('VIN', max_length=17, blank=True)
     description = models.TextField('Описание', blank=True)
+    internal_note = models.TextField(
+        'Внутренняя заметка', blank=True,
+        help_text='Видна только в админке, на сайте никогда не показывается.',
+    )
     status = models.CharField(
         'Статус', max_length=10,
         choices=Status.choices, default=Status.FOR_SALE,

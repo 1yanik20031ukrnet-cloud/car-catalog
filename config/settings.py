@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',  # красивая тема админки, должна идти до django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -122,6 +123,17 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # Uploaded files (car photos)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Admin theme (django-unfold)
+# https://unfoldadmin.com/docs/
+
+UNFOLD = {
+    'SITE_TITLE': 'Premium Cars — админка',
+    'SITE_HEADER': 'Premium Cars',
+    'SITE_SYMBOL': 'directions_car',
+    'SHOW_LANGUAGES': False,
+}
 
 
 # Email

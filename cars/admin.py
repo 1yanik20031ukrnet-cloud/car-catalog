@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin, TabularInline
+from unfold.decorators import display
 
 from .models import Booking, Car, CarImage, Dealer
 
@@ -32,7 +34,10 @@ class CarAdminForm(forms.ModelForm):
         label='Загрузить фотографии',
         required=False,
         help_text='Можно выделить сразу несколько файлов. '
-                  'Первое фото станет главным в каталоге.',
+                  'Первое фото станет главным в каталоге. '
+                  'Совет: если форма ниже покажет ошибку и её придётся '
+                  'исправлять — выберите фотографии заново, браузер '
+                  'сбрасывает выбор файлов при повторной отправке.',
     )
 
     class Meta:
@@ -41,11 +46,11 @@ class CarAdminForm(forms.ModelForm):
 
 
 @admin.register(Dealer)
-class DealerAdmin(admin.ModelAdmin):
+class DealerAdmin(ModelAdmin):
     list_display = ['name', 'phone', 'currency']
 
 
-class CarImageInline(admin.TabularInline):
+class CarImageInline(TabularInline):
     """Photos already uploaded: reorder, replace or delete them."""
 
     model = CarImage
@@ -65,9 +70,9 @@ class CarImageInline(admin.TabularInline):
 
 
 @admin.register(Car)
-class CarAdmin(admin.ModelAdmin):
+class CarAdmin(ModelAdmin):
     form = CarAdminForm
-    list_display = ['photo', '__str__', 'price_display', 'mileage_km', 'status', 'created_at']
+    list_display = ['photo', '__str__', 'price_display', 'mileage_km', 'status_badge', 'created_at']
     list_filter = ['status', 'brand', 'fuel', 'transmission']
     search_fields = ['brand', 'model', 'vin']
     readonly_fields = ['slug', 'created_at', 'updated_at']
@@ -90,6 +95,9 @@ class CarAdmin(admin.ModelAdmin):
         ('Описание и VIN', {
             'fields': ['description', 'vin'],
         }),
+        ('Внутренняя заметка (не видна на сайте)', {
+            'fields': ['internal_note'],
+        }),
         ('Служебное (заполняется автоматически)', {
             'fields': ['slug', 'created_at', 'updated_at'],
             'classes': ['collapse'],
@@ -109,6 +117,14 @@ class CarAdmin(admin.ModelAdmin):
     @admin.display(description='Цена', ordering='price')
     def price_display(self, obj):
         return f'{obj.price:,} {obj.dealer.currency}'.replace(',', ' ')
+
+    @display(description='Статус', label={
+        Car.Status.FOR_SALE: 'success',
+        Car.Status.RESERVED: 'warning',
+        Car.Status.SOLD: 'danger',
+    })
+    def status_badge(self, obj):
+        return obj.status, obj.get_status_display()
 
     def save_related(self, request, form, formsets, change):
         """Save inline photo edits, then append the newly uploaded photos."""
@@ -131,7 +147,7 @@ class CarAdmin(admin.ModelAdmin):
 
 
 @admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
+class BookingAdmin(ModelAdmin):
     list_display = ['name', 'phone', 'car', 'date', 'preferred_time', 'created_at']
     list_filter = ['date']
     search_fields = ['name', 'phone']
