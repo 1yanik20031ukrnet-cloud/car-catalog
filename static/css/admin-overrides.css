@@ -22,8 +22,29 @@
    is enough to keep the badge on the right photo while dragging —
    no extra JS needed to track it. */
 .photo-preview-cell {
+    /* Fills the whole card, not just the photo, and carries
+       x-sort:handle — so grabbing the empty space around the photo
+       starts a drag too, not only the small icon unfold adds.
+       Fixed 90px, not height:100%: this sits inside a couple of
+       unfold's own wrapper <div>s that don't have a definite height
+       themselves, so a percentage here had nothing to resolve
+       against and silently fell back to auto. That was invisible
+       for landscape demo photos (close enough to 90px to go
+       unnoticed) but a square/portrait upload rendered full-size and
+       covered the delete button below it. 90px matches
+       td.field-preview's own fixed height further down. */
     position: relative;
-    display: inline-block;
+    display: block;
+    width: 100%;
+    height: 90px;
+    cursor: grab;
+}
+
+.photo-thumb {
+    display: block;
+    width: 100%;
+    height: 90px; /* see .photo-preview-cell comment above */
+    object-fit: cover;
 }
 
 .cover-badge {
@@ -43,6 +64,84 @@
 
 table.formset tbody.form-group:first-of-type .cover-badge {
     display: inline-block;
+}
+
+/* Lay the already-uploaded photos out as a row of cards instead of
+   one full-width strip per photo — closer to how a phone gallery
+   reorders photos, and pairs with the wider drag handle above. Only
+   changes how the inline's <table> is drawn; the <table>/<tbody>/
+   <tr>/<td> structure Django's formset needs (ids, delete checkboxes,
+   the hidden order field) is untouched. */
+#images-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: transparent;
+}
+
+#images-data > tbody.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 132px;
+    width: 132px;
+    height: 128px;
+    border: 1px solid oklch(30% .035 255);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* The title row above each photo ("Фото ... (#N)") only still carries
+   the hidden id/car inputs — its visible text repeats what the cover
+   badge already shows and goes stale the moment a photo is dragged,
+   so it's hidden here, not removed (hidden inputs keep working). */
+#images-data > tbody.form-group > tr:first-child {
+    display: none;
+}
+
+/* Unfold's own small drag_indicator icon — redundant now that the
+   whole card is a drag handle (.photo-preview-cell, above), so it's
+   hidden rather than left cluttering the corner. */
+#images-data td.field-preview > div.flex > span:first-child {
+    display: none;
+}
+
+/* Photo on top, delete button centered underneath — a column, not a
+   row, so the trash icon isn't floating off to the side of the card.
+   Fixed pixel heights on purpose, not flex ratios: a <td> is not a
+   normal flex child (it still carries a browser default of
+   display:table-cell underneath), and letting flex guess its height
+   from "auto" content left the delete button's box too short — it
+   got clipped down to a sliver by the card's overflow:hidden. Explicit
+   heights that add up to the card's own 128px sidestep that guessing
+   entirely. */
+#images-data > tbody.form-group > tr.form-row {
+    display: flex;
+    flex-direction: column;
+    height: 128px;
+}
+
+#images-data td.field-preview {
+    height: 90px;
+    min-height: 0 !important; /* unfold puts min-h-[62.5px] on every td */
+    flex: none;
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+#images-data td.delete {
+    width: 100% !important; /* unfold ships this cell as w-px (1px) —
+        a "shrink to content" trick that only works in real table
+        layout; taken literally by flex, it squashed the delete
+        button down to a 1px-wide sliver */
+    height: 38px;
+    min-height: 0 !important; /* same min-h-[62.5px] override */
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    border: 0 !important;
 }
 
 /* Instant client-side preview of newly picked (not yet uploaded)

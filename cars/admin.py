@@ -108,14 +108,24 @@ class DealerAdmin(ModelAdmin):
 
 
 class CarImageInlineForm(forms.ModelForm):
-    """Hides the raw image widget — replacing files happens by deleting
-    a photo here and adding a new one through the top upload field, not
-    by editing this row's file path in place."""
+    """Leaves 'image' out of the form entirely — replacing a file
+    happens by deleting a photo here and adding a new one through the
+    top upload field, not by editing this row's file in place.
+
+    Earlier this hid the field with forms.HiddenInput() instead of
+    leaving it out — that rendered a hidden input whose value was the
+    file's *path as plain text*. Django resubmits that text on every
+    save, and FileField can't accept a plain string as a file, so it
+    silently failed validation with no visible error (the field had
+    no visible spot to show one) — every re-save of a car that already
+    had photos was broken. Leaving 'image' out of the form's own
+    fields entirely means nothing gets posted for it at all, so
+    Django correctly keeps the existing file untouched. (2026-09-01)
+    """
 
     class Meta:
         model = CarImage
-        fields = ['image', 'order']
-        widgets = {'image': forms.HiddenInput()}
+        fields = ['order']
 
 
 class CarImageInline(TabularInline):
@@ -131,7 +141,7 @@ class CarImageInline(TabularInline):
     form = CarImageInlineForm
     extra = 0
     verbose_name_plural = 'Уже загруженные фотографии — перетащите, чтобы поменять порядок'
-    fields = ['preview', 'image', 'order']
+    fields = ['preview', 'order']
     readonly_fields = ['preview']
     ordering_field = 'order'
     hide_ordering_field = True
@@ -143,9 +153,13 @@ class CarImageInline(TabularInline):
     def preview(self, obj):
         if not obj.image:
             return '—'
+        # x-sort:handle (unfold/alpine.sort.js) makes this whole card a
+        # drag handle, not just the small drag_indicator icon it ships
+        # with — grabbing the photo itself, or the space around it,
+        # now starts a drag too.
         return format_html(
-            '<div class="photo-preview-cell">'
-            '<img src="{}" style="height:70px;border-radius:4px;">'
+            '<div class="photo-preview-cell" x-sort:handle>'
+            '<img class="photo-thumb" src="{}">'
             '<span class="cover-badge">Обложка</span>'
             '</div>',
             obj.image.url,
