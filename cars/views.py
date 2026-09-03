@@ -10,9 +10,22 @@ def catalog(request):
     the catalog matches what the dealer actually has on the lot. Filtering
     and sorting arrive in stage 3.
     """
+    cars = Car.objects.prefetch_related('images')
+
+    # Single body-type filter behind the breadcrumb on the car page. The
+    # full filter set (brand, price, year, fuel, gearbox) is stage 3.
+    bodies = dict(Car.Body.choices)
+    body = request.GET.get('body', '')
+    if body in bodies:
+        cars = cars.filter(body=body)
+    else:
+        body = ''
+
     return render(request, 'cars/catalog.html', {
-        'cars': Car.objects.prefetch_related('images'),
+        'cars': cars,
         'dealer': Dealer.objects.first(),
+        'active_body': body,
+        'active_body_label': bodies.get(body, ''),
     })
 
 

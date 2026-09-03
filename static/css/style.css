@@ -218,6 +218,42 @@ a {
     color: var(--ink-muted);
 }
 
+/* ---------- Active filter ---------- */
+
+.active-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+}
+
+.active-filter__label {
+    padding: 7px 14px;
+    border-radius: var(--r-pill);
+    background: var(--chip);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.active-filter__reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    font-size: 13px;
+    color: var(--ink-muted);
+}
+
+.active-filter__reset:hover {
+    color: var(--accent);
+}
+
+.active-filter__reset svg {
+    width: 14px;
+    height: 14px;
+}
+
 /* ---------- Card grid ---------- */
 
 .catalog-grid {

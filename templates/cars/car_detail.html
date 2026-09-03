@@ -12,9 +12,8 @@
                 <a href="{% url 'cars:catalog' %}">Каталог</a>
                 <svg class="crumbs__sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </li>
-            {# The body type is not a link yet: filtering arrives in stage 3. #}
             <li class="crumbs__item">
-                <span>{{ car.get_body_display }}</span>
+                <a href="{% url 'cars:catalog' %}?body={{ car.body }}">{{ car.get_body_display }}</a>
                 <svg class="crumbs__sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
             </li>
             <li class="crumbs__item">
