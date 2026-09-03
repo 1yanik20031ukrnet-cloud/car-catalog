@@ -196,12 +196,13 @@ a {
     margin-top: 10px;
 }
 
-/* ---------- Catalog heading ---------- */
+/* ---------- Catalog heading, filters & sort ---------- */
 
 .catalog-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 12px;
     padding: 6px 0 16px;
 }
@@ -213,9 +214,143 @@ a {
     letter-spacing: -0.015em;
 }
 
-.catalog-bar__note {
-    font-size: 12.5px;
+.catalog-bar__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* "Chip" fields — every control in the filter bar (selects, number
+   inputs, the sort dropdown, the Фильтры toggle below) shares this soft
+   pill shape. It reuses --chip, a token that already existed for this
+   but wasn't used anywhere yet — the idea is these read as the same
+   family as the price/status pills on the cards, not a bare HTML form
+   dropped on top of the catalog. */
+.chip-field {
+    height: var(--tap);
+    padding: 0 14px;
+    border: 1.5px solid transparent;
+    border-radius: var(--r-pill);
+    background: var(--chip);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+.chip-field::placeholder {
     color: var(--ink-muted);
+}
+
+.chip-field:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.chip-field--select {
+    appearance: none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6862' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+}
+
+.sort-select {
+    max-width: 150px;
+}
+
+/* ---------- Filters toggle + panel ----------
+   A native <details>/<summary> — opening/closing needs no JS at all,
+   which matches how light the rest of the site's scripting is. */
+.filters {
+    position: relative;
+}
+
+.filters__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: var(--tap);
+    padding: 0 16px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-pill);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    user-select: none;
+}
+
+.filters__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.filters[open] .filters__toggle {
+    border-color: var(--ink);
+}
+
+.filters__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.filters__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-card);
+    background: var(--bg);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+}
+
+.filters__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filters__label {
+    font-size: 12px;
+    color: var(--ink-muted);
+}
+
+.filters__field .chip-field {
+    width: 100%;
+}
+
+.filters__range {
+    display: flex;
+    gap: 8px;
+}
+
+.filters__range .chip-field {
+    width: 100%;
+    min-width: 0;
+}
+
+.filters__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.filters__actions .btn {
+    flex: 1;
 }
 
 /* ---------- Card grid ---------- */
@@ -1126,10 +1261,18 @@ a {
 /* ---------- Empty state ---------- */
 
 .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
     padding: 48px 0 64px;
     text-align: center;
     color: var(--ink-muted);
     font-size: 14px;
+}
+
+.empty__text {
+    max-width: 320px;
 }
 
 /* ---------- Sticky contact bar (mobile only) ---------- */
@@ -1309,6 +1452,16 @@ a {
     .catalog-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 30px 20px;
+    }
+
+    /* Past mobile the filter panel stops pushing the grid down and
+       floats as a popover under its toggle instead. */
+    .filters__panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        z-index: 5;
+        width: 320px;
     }
 
     .car-card__title {

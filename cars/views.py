@@ -1,23 +1,47 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 
+from . import filters as car_filters
 from .models import Car, Dealer
 
 
 def catalog(request):
-    """Main page: dealer header + the car grid.
+    """Main page: dealer header + the car grid, narrowed/sorted by
+    whatever filter form fields are present in the URL's query string
+    (see cars/filters.py and the form in templates/cars/catalog.html).
 
     Sold and reserved cars stay in the list (marked with their status) so
-    the catalog matches what the dealer actually has on the lot. Filtering
-    and sorting arrive in stage 3.
+    the catalog matches what the dealer actually has on the lot — filters
+    narrow within that, they don't hide sold cars on their own.
 
     Draft (not yet is_published) cars are left out — same rule as
     car_detail's 404 for everyone but staff, just applied to the list
     instead of a single page.
     """
+    cars = Car.objects.filter(is_published=True).prefetch_related('images')
+    cars, active_filters, sort = car_filters.filter_cars(cars, request.GET)
+    # Evaluated once here — the template checks it, counts it, and loops
+    # over it, and a QuerySet would otherwise hit the database again for
+    # each of those instead of reusing one result set.
+    cars = list(cars)
+
+    # Only brands actually present in the (published) catalog — offering
+    # one with zero matches would just be a dead end for the visitor.
+    brands = sorted(
+        set(Car.objects.filter(is_published=True).exclude(brand='').values_list('brand', flat=True)),
+        key=str.casefold,
+    )
+
     return render(request, 'cars/catalog.html', {
-        'cars': Car.objects.filter(is_published=True).prefetch_related('images'),
+        'cars': cars,
         'dealer': Dealer.objects.first(),
+        'brands': brands,
+        'fuel_choices': Car.Fuel.choices,
+        'transmission_choices': Car.Transmission.choices,
+        'sort_options': car_filters.SORT_OPTIONS,
+        'sort': sort,
+        'filters': active_filters,
+        'active_filter_count': len(active_filters),
     })
 
 

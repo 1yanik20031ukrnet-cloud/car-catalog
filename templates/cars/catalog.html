@@ -34,10 +34,86 @@
 </header>
 
 <main class="container">
-    <div class="catalog-bar">
+    <form method="get" class="catalog-bar">
         <h2 class="catalog-bar__count">Каталог</h2>
-        <p class="catalog-bar__note">Сначала новые</p>
-    </div>
+
+        <div class="catalog-bar__controls">
+            <select name="sort" class="chip-field chip-field--select sort-select" onchange="this.form.submit()" aria-label="Сортировка">
+                {% for key, option in sort_options.items %}
+                <option value="{{ key }}"{% if key == sort %} selected{% endif %}>{{ option.1 }}</option>
+                {% endfor %}
+            </select>
+
+            <details class="filters"{% if active_filter_count %} open{% endif %}>
+                <summary class="filters__toggle">
+                    Фильтры{% if active_filter_count %}<span class="filters__badge">{{ active_filter_count }}</span>{% endif %}
+                </summary>
+
+                <div class="filters__panel">
+                    <label class="filters__field">
+                        <span class="filters__label">Марка</span>
+                        <select name="brand" class="chip-field chip-field--select">
+                            <option value="">Любая</option>
+                            {% for brand in brands %}
+                            <option value="{{ brand }}"{% if filters.brand == brand %} selected{% endif %}>{{ brand }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label class="filters__field">
+                        <span class="filters__label">Модель</span>
+                        <input type="text" name="model" class="chip-field" value="{{ filters.model|default:'' }}" placeholder="например 530d">
+                    </label>
+
+                    <div class="filters__field filters__field--range">
+                        <span class="filters__label">Цена, {{ dealer.currency }}</span>
+                        <span class="filters__range">
+                            <input type="number" name="price_min" class="chip-field" value="{{ filters.price_min|default:'' }}" placeholder="от" min="0" inputmode="numeric">
+                            <input type="number" name="price_max" class="chip-field" value="{{ filters.price_max|default:'' }}" placeholder="до" min="0" inputmode="numeric">
+                        </span>
+                    </div>
+
+                    <div class="filters__field filters__field--range">
+                        <span class="filters__label">Год</span>
+                        <span class="filters__range">
+                            <input type="number" name="year_min" class="chip-field" value="{{ filters.year_min|default:'' }}" placeholder="от" min="1980" inputmode="numeric">
+                            <input type="number" name="year_max" class="chip-field" value="{{ filters.year_max|default:'' }}" placeholder="до" min="1980" inputmode="numeric">
+                        </span>
+                    </div>
+
+                    <label class="filters__field">
+                        <span class="filters__label">Пробег до, км</span>
+                        <input type="number" name="mileage_max" class="chip-field" value="{{ filters.mileage_max|default:'' }}" placeholder="без ограничения" min="0" inputmode="numeric">
+                    </label>
+
+                    <label class="filters__field">
+                        <span class="filters__label">Топливо</span>
+                        <select name="fuel" class="chip-field chip-field--select">
+                            <option value="">Любое</option>
+                            {% for value, label in fuel_choices %}
+                            <option value="{{ value }}"{% if filters.fuel == value %} selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label class="filters__field">
+                        <span class="filters__label">Коробка</span>
+                        <select name="transmission" class="chip-field chip-field--select">
+                            <option value="">Любая</option>
+                            {% for value, label in transmission_choices %}
+                            <option value="{{ value }}"{% if filters.transmission == value %} selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <div class="filters__actions">
+                        <a class="btn btn--ghost" href="{% url 'cars:catalog' %}">Сбросить</a>
+                        <button type="submit" class="btn btn--primary">Показать {{ cars|length }}</button>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </form>
 
     {% if cars %}
     <ul class="catalog-grid">
@@ -93,6 +169,11 @@
         </li>
         {% endfor %}
     </ul>
+    {% elif active_filter_count %}
+    <div class="empty">
+        <p class="empty__text">По этим фильтрам ничего не нашлось. Попробуйте расширить диапазон или сбросить часть фильтров.</p>
+        <a class="btn btn--ghost" href="{% url 'cars:catalog' %}">Сбросить фильтры</a>
+    </div>
     {% else %}
     <p class="empty">Пока нет автомобилей в каталоге.</p>
     {% endif %}
