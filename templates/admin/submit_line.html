@@ -17,6 +17,19 @@ upgrade changes the original template.
                     {% endcomponent %}
                 {% endif %}
 
+                {% if opts.model_name == 'car' and show_save %}
+                    {% comment %}
+                    "Опубликовать" — Car-only, see cars/admin.py's
+                    save_model/response_change/response_add for the
+                    _publish handling. Own color (.btn-publish in
+                    admin-overrides.css) so it doesn't blend into the
+                    "Сохранить" buttons next to it.
+                    {% endcomment %}
+                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_publish" class="w-full lg:w-auto btn-publish" %}
+                        Опубликовать
+                    {% endcomponent %}
+                {% endif %}
+
                 {% for action in actions_submit_line %}
                     {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name=action.attrs.name|default:action.action_name variant="default" class="w-full lg:w-auto" attrs=action.attrs %}
                         {% if action.icon %}
@@ -39,16 +52,13 @@ upgrade changes the original template.
                     {% endcomponent %}
                 {% endif %}
 
-                {% if show_save_and_add_another %}
-                    {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_addanother" variant="default" class="w-full lg:w-auto" %}
-                        {% comment %}
-                        generic wording, not "новая машина" — this same
-                        template renders for every model in the admin
-                        (Dealer, Booking, User...), not just Car
-                        {% endcomment %}
-                        Сохранить → добавить ещё
-                    {% endcomponent %}
-                {% endif %}
+                {% comment %}
+                "Сохранить и добавить другой объект" removed entirely
+                (owner's request, 2026-09-03) — felt like clutter with
+                "Опубликовать" now in the row too. show_save_as_new is
+                for a different, rarely-used action ("Save as new" —
+                duplicates the object) and is left alone.
+                {% endcomment %}
 
                 {% if show_save_as_new %}
                     {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_saveasnew" variant="default" class="w-full lg:w-auto" %}
@@ -56,7 +66,34 @@ upgrade changes the original template.
                     {% endcomponent %}
                 {% endif %}
 
-                <div class="flex flex-col gap-3 mr-auto w-full lg:flex-row lg:w-auto">
+                {% if has_absolute_url and show_view_on_site %}
+                    {% comment %}
+                    Moved here (into the right-hand button group) from
+                    the left side, next to Close/Delete — it sat right
+                    beside the destructive "Удалить" button, easy to
+                    misclick while reaching for a preview
+                    (owner's request, 2026-09-03).
+                    {% endcomment %}
+                    {% component "unfold/components/button.html" with href=absolute_url variant="default" class="w-full lg:w-auto" %}
+                        Смотреть на сайте
+                    {% endcomponent %}
+                {% endif %}
+
+                <div class="flex flex-col gap-3 mr-auto w-full items-center lg:flex-row lg:w-auto">
+                    {% if opts.model_name == 'car' and original %}
+                        {% comment %}
+                        Read-only publish-status badge, not a toggle —
+                        owner felt the checkbox further down the form
+                        was redundant now that "Опубликовать" exists as
+                        its own button (2026-09-03). Turning publication
+                        back off happens via the "Снять с публикации"
+                        action in the car list, not from this page.
+                        {% endcomment %}
+                        <span class="publish-status-badge {% if original.is_published %}is-published{% endif %}">
+                            {% if original.is_published %}Опубликовано{% else %}Черновик{% endif %}
+                        </span>
+                    {% endif %}
+
                     {% if show_close or adminform.model_admin.change_form_show_cancel_button %}
                         {% url opts|admin_urlname:'changelist' as changelist_url %}
                         {% add_preserved_filters changelist_url as link %}

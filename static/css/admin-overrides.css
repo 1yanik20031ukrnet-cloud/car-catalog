@@ -15,6 +15,44 @@
     --color-red-600: oklch(57.7% .11 27.325);
 }
 
+/* "Опубликовать" button (templates/admin/submit_line.html, Car only)
+   — same muted-but-solid style as the "Сохранить" buttons next to it,
+   just green instead of the accent blue-gray, so it reads as its own
+   action rather than another shade of Save. !important because the
+   button component's own bg-primary-600 utility class has the same
+   specificity and would otherwise win or lose depending on Tailwind's
+   own internal ordering, not the order these two classes appear in
+   the HTML. */
+.btn-publish {
+    background: oklch(52% .13 150) !important;
+    border-color: transparent !important;
+}
+
+.btn-publish:hover {
+    background: oklch(52% .13 150 / 85%) !important;
+}
+
+/* Read-only publish-status pill next to the buttons (submit_line.html,
+   Car only) — muted grey for "Черновик", the same green as
+   .btn-publish for "Опубликовано" once it's actually live. */
+.publish-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: oklch(70% .01 260);
+    background: oklch(30% .01 260);
+    white-space: nowrap;
+}
+
+.publish-status-badge.is-published {
+    color: #eafff1;
+    background: oklch(52% .13 150 / 90%);
+}
+
 /* Car photos: "Обложка" (cover) badge on the already-uploaded photo
    that is currently first — the one used as the catalog thumbnail.
    django-unfold's drag-and-drop sorting (alpine.sort.js) actually
@@ -37,6 +75,7 @@
     display: block;
     width: 100%;
     height: 90px;
+    background: oklch(17% .02 257); /* letterbox fill, see .photo-thumb */
     cursor: grab;
 }
 
@@ -44,7 +83,13 @@
     display: block;
     width: 100%;
     height: 90px; /* see .photo-preview-cell comment above */
-    object-fit: cover;
+    /* contain, not cover: a fixed landscape-ish box cropped a lot off
+       a vertical phone photo — you couldn't actually tell what was in
+       it while editing. Showing the whole photo (letterboxed on the
+       sides/top for photos that don't match this box) matters more
+       here than a perfectly uniform grid; a catalog-facing grid can
+       still choose cover for its own card design later. */
+    object-fit: contain;
 }
 
 .cover-badge {
@@ -80,6 +125,7 @@ table.formset tbody.form-group:first-of-type .cover-badge {
 }
 
 #images-data > tbody.form-group {
+    position: relative; /* anchors the delete-confirmation overlay below */
     display: flex;
     flex-direction: column;
     flex: 0 0 132px;
@@ -88,6 +134,29 @@ table.formset tbody.form-group:first-of-type .cover-badge {
     border: 1px solid oklch(30% .035 255);
     border-radius: 8px;
     overflow: hidden;
+}
+
+/* Clicking the trash icon doesn't delete right away — Django marks the
+   photo for deletion and shows "This item will be deleted. Click to
+   cancel", with a chance to change your mind before hitting Save. That
+   row is normally a plain <tr>, sized by table layout; inside our flex
+   card it became just another stacked item competing for the same
+   128px, which squashed and overlapped everything. It's meant to be
+   an overlay covering the whole card, so it's pulled out of the flex
+   flow and positioned over the card instead — using :has() directly
+   here means it doesn't depend on knowing unfold's own (dynamically
+   generated) class name for the same show/hide toggle. */
+#images-data > tbody.form-group:has(.delete:checked) > tr.form-delete {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+#images-data > tbody.form-group > tr.form-delete > td {
+    height: 100%;
+    padding: 0 !important;
+    border: 0 !important;
 }
 
 /* The title row above each photo ("Фото ... (#N)") only still carries

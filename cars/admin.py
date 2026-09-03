@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
@@ -84,7 +86,15 @@ class CarAdminForm(forms.ModelForm):
 
     class Meta:
         model = Car
-        fields = '__all__'
+        # is_published deliberately excluded: it's not shown as a
+        # field in any fieldset any more (just a status badge next to
+        # the buttons, see templates/admin/submit_line.html), and if
+        # it stayed in the form, a plain "Сохранить" would silently
+        # reset it to False — Django treats a checkbox missing from
+        # the page the same as an unchecked one. Only the "Опубликовать"
+        # button (CarAdmin.save_model) and the two list actions
+        # (publish_cars / unpublish_cars) are meant to change it.
+        exclude = ['is_published']
 
     class Media:
         js = ['cars/admin_photos.js']
@@ -169,16 +179,22 @@ class CarImageInline(TabularInline):
 @admin.register(Car)
 class CarAdmin(ModelAdmin):
     form = CarAdminForm
-    list_display = ['photo', '__str__', 'price_display', 'mileage_km', 'status_badge', 'created_at']
-    list_filter = ['status', 'brand', 'fuel', 'transmission']
+    list_display = [
+        'photo', '__str__', 'price_display', 'mileage_km',
+        'status_badge', 'is_published', 'created_at',
+    ]
+    list_filter = ['status', 'is_published', 'brand', 'fuel', 'transmission']
     search_fields = ['brand', 'model', 'vin']
-    readonly_fields = ['slug', 'created_at', 'updated_at']
+    readonly_fields = ['slug', 'created_at', 'updated_at', 'video_preview']
     inlines = [CarImageInline]
-    actions = ['mark_sold']
+    actions = ['mark_sold', 'publish_cars', 'unpublish_cars']
 
     fieldsets = [
         ('Фотографии', {
             'fields': ['photos'],
+        }),
+        ('Видео', {
+            'fields': ['video_preview', 'video'],
         }),
         ('Основное', {
             'fields': ['dealer', 'brand', 'model', 'year', 'price', 'status'],
@@ -200,6 +216,19 @@ class CarAdmin(ModelAdmin):
             'classes': ['collapse'],
         }),
     ]
+
+    @admin.display(description='Текущее видео')
+    def video_preview(self, obj):
+        if not obj.video:
+            return 'Видео ещё не загружено.'
+        return format_html(
+            '<video controls style="max-width:280px;max-height:160px;'
+            'border-radius:6px;display:block;">'
+            '<source src="{}">'
+            'Браузер не может показать видео.'
+            '</video>',
+            obj.video.url,
+        )
 
     @admin.display(description='Фото')
     def photo(self, obj):
@@ -223,6 +252,36 @@ class CarAdmin(ModelAdmin):
     def status_badge(self, obj):
         return obj.status, obj.get_status_display()
 
+    def save_model(self, request, obj, form, change):
+        """The 'Опубликовать' button (templates/admin/submit_line.html)
+        submits the normal form plus a `_publish` flag — flip the field
+        here so it's published even if the checkbox further down the
+        form wasn't touched."""
+        if '_publish' in request.POST:
+            obj.is_published = True
+        super().save_model(request, obj, form, change)
+
+    def response_change(self, request, obj):
+        """After '_publish', stay on the same page (like 'Сохранить →
+        остаться здесь') instead of Django's default redirect, so the
+        owner immediately sees the checkbox is now checked."""
+        if '_publish' in request.POST:
+            self.message_user(request, f'«{obj}» опубликован(а) на сайте.')
+            return HttpResponseRedirect(request.path)
+        return super().response_change(request, obj)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        """Same '_publish' handling for a brand-new car — land on its
+        own edit page afterwards rather than Django's default (the
+        changelist), since that's the more useful place to be right
+        after creating and publishing one."""
+        if '_publish' in request.POST:
+            self.message_user(request, f'«{obj}» создан(а) и опубликован(а) на сайте.')
+            return HttpResponseRedirect(
+                reverse('admin:cars_car_change', args=[obj.pk]),
+            )
+        return super().response_add(request, obj, post_url_continue)
+
     def save_related(self, request, form, formsets, change):
         """Save inline photo edits, then append the newly uploaded photos."""
         super().save_related(request, form, formsets, change)
@@ -241,6 +300,16 @@ class CarAdmin(ModelAdmin):
     def mark_sold(self, request, queryset):
         updated = queryset.update(status=Car.Status.SOLD)
         self.message_user(request, f'Продано автомобилей: {updated}')
+
+    @admin.action(description='Опубликовать выбранные автомобили на сайте')
+    def publish_cars(self, request, queryset):
+        updated = queryset.update(is_published=True)
+        self.message_user(request, f'Опубликовано автомобилей: {updated}')
+
+    @admin.action(description='Снять выбранные автомобили с публикации')
+    def unpublish_cars(self, request, queryset):
+        updated = queryset.update(is_published=False)
+        self.message_user(request, f'Снято с публикации: {updated}')
 
 
 @admin.register(Booking)

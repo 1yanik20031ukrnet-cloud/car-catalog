@@ -1,0 +1,67 @@
+{% load i18n %}
+{% comment %}
+Overrides unfold's own admin/app_list.html (renders the sidebar) —
+same layout, just adds a small "+" next to each model that shows a
+plus icon linking straight to its "add" page, so you don't have to
+open the list first and look for the button up top (owner's request,
+2026-09-03). See CLAUDE.md if this needs updating after an unfold
+upgrade changes the original template.
+{% endcomment %}
+
+{% if app_list %}
+    <div id="nav-sidebar-apps" class="h-0 grow overflow-auto scrollbar-default-hover">
+        {% for app in app_list %}
+            <div class="app-{{ app.app_label }} module{% if app.app_url in request.path %} current-app{% endif %}">
+                <ol class="px-6">
+                    {% if app.models and not app.hidden %}
+                        <li>
+                            {% if app.name %}
+                                <h2>
+                                    <a href="{{ app.app_url }}" class="block font-semibold mb-2 mt-4 text-font-important-light text-sm truncate dark:text-font-important-dark" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">
+                                        {{ app.name }}
+                                    </a>
+                                </h2>
+                            {% endif %}
+
+                            <ol class="flex flex-col">
+                                {% for model in app.models %}
+                                    {% if not model.hidden %}
+                                        <li class="model-{{ model.object_name|lower }}">
+                                            {% if model.header %}
+                                                <h3 class="font-medium my-2 text-base-900 text-sm dark:text-base-200">
+                                                    {{ model.header }}
+                                                </h3>
+                                            {% endif %}
+
+                                            {% if model.admin_url %}
+                                                <div class="flex items-center -mx-3 px-3 rounded-default {% if model.admin_url in request.path|urlencode %}bg-base-100 font-semibold dark:bg-white/[.06]{% endif %}">
+                                                    <a href="{{ model.admin_url }}" id="link-{{ app.app_label }}-{{ model.object_name|lower }}"
+                                                       class="flex grow h-[38px] items-center truncate hover:text-primary-600 dark:hover:text-primary-500 {% if model.admin_url in request.path|urlencode %}text-primary-600 dark:text-primary-500 active{% endif %}">
+                                                        {{ model.name }}
+                                                    </a>
+                                                    {% if model.add_url %}
+                                                        <a href="{{ model.add_url }}" title="Добавить: {{ model.name }}"
+                                                           class="flex h-6 items-center justify-center rounded-default shrink-0 text-base-400 w-6 hover:bg-base-200 hover:text-primary-600 dark:hover:bg-white/[.1] dark:hover:text-primary-500">
+                                                            <span class="material-symbols-outlined text-[18px]">add</span>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                {{ model.name }}
+                                            {% endif %}
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ol>
+                        </li>
+                    {% endif %}
+                </ol>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>
+        {% trans "You don’t have permission to view or edit anything." as error_message %}
+        {% include "unfold/helpers/messages/error.html" with error=error_message %}
+    </p>
+{% endif %}

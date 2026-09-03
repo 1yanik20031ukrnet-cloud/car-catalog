@@ -108,6 +108,7 @@ class Command(BaseCommand):
                 body=body,
                 status=status,
                 description=DESCRIPTION,
+                is_published=True,
             )
             for photo_number in range(3):
                 gradient = GRADIENTS[(index + photo_number) % len(GRADIENTS)]

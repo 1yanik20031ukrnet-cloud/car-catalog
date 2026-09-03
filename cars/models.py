@@ -1,5 +1,17 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
+
+MAX_VIDEO_SIZE_MB = 100
+
+
+def validate_video_size(file):
+    """Keeps someone from filling up the server's disk with one upload."""
+    limit = MAX_VIDEO_SIZE_MB * 1024 * 1024
+    if file.size > limit:
+        raise ValidationError(f'Видео больше {MAX_VIDEO_SIZE_MB} МБ — сожмите файл перед загрузкой.')
 
 # Подсказки марок для админки (автодополнение) и будущего фильтра
 # в каталоге. Марка у Car остаётся обычным текстовым полем — этот
@@ -104,6 +116,22 @@ class Car(models.Model):
         'Статус', max_length=10,
         choices=Status.choices, default=Status.FOR_SALE,
     )
+    video = models.FileField(
+        'Видео', upload_to='cars/videos/', blank=True,
+        validators=[
+            FileExtensionValidator(['mp4', 'mov', 'webm']),
+            validate_video_size,
+        ],
+        help_text=f'mp4, mov или webm, до {MAX_VIDEO_SIZE_MB} МБ.',
+    )
+    is_published = models.BooleanField(
+        'Опубликовано', default=False,
+        help_text='Пока не отмечено — машина не видна на сайте, даже '
+                  'если сохранена в админке. Отдельно от статуса '
+                  '(в продаже/резерв/продан): статус решает, что '
+                  'написано на странице, «опубликовано» решает, '
+                  'существует ли страница для посетителей вообще.',
+    )
     slug = models.SlugField(
         'Адрес страницы (slug)', max_length=150, unique=True, blank=True,
         help_text='Заполняется автоматически, например bmw-530d-2020',
@@ -118,6 +146,9 @@ class Car(models.Model):
 
     def __str__(self):
         return f'{self.brand} {self.model} {self.year}'
+
+    def get_absolute_url(self):
+        return reverse('cars:car_detail', args=[self.slug])
 
     def save(self, *args, **kwargs):
         if not self.slug:

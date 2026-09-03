@@ -11,11 +11,21 @@
 <p><strong>{{ car.get_status_display }}</strong></p>
 {% endif %}
 
+{% if not car.is_published %}
+<p><strong>Черновик — видно только вам, посетители сайта пока не видят эту страницу.</strong></p>
+{% endif %}
+
 <div>
     {% for image in car.images.all %}
     <img src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }}" style="max-width: 100%;">
     {% endfor %}
 </div>
+
+{% if car.video %}
+<video controls style="max-width: 100%;">
+    <source src="{{ car.video.url }}">
+</video>
+{% endif %}
 
 <p><strong>{{ car.price }} {{ car.dealer.currency }}</strong></p>
 
