@@ -8,6 +8,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
 from unfold.widgets import UnfoldAdminTextInputWidget
 
+from . import formatting
 from .models import Booking, Car, CarImage, COMMON_CAR_BRANDS, Dealer
 
 
@@ -183,7 +184,7 @@ class CarAdmin(ModelAdmin):
         'photo', '__str__', 'price_display', 'mileage_km',
         'status_badge', 'is_published', 'created_at',
     ]
-    list_filter = ['status', 'is_published', 'brand', 'fuel', 'transmission']
+    list_filter = ['status', 'is_published', 'brand', 'fuel', 'transmission', 'accident', 'negotiable']
     search_fields = ['brand', 'model', 'vin']
     readonly_fields = ['slug', 'created_at', 'updated_at', 'video_preview']
     inlines = [CarImageInline]
@@ -204,6 +205,11 @@ class CarAdmin(ModelAdmin):
                 'mileage_km', 'fuel', 'transmission',
                 'engine_capacity', 'power_hp', 'drive', 'body',
             ],
+        }),
+        ('Отметки на сайте', {
+            'description': 'Показываются на странице автомобиля тремя '
+                           'плашками рядом с ценой.',
+            'fields': ['accident', 'imported_from', 'negotiable'],
         }),
         ('Описание и VIN', {
             'fields': ['description', 'vin'],
@@ -242,7 +248,7 @@ class CarAdmin(ModelAdmin):
 
     @admin.display(description='Цена', ordering='price')
     def price_display(self, obj):
-        return f'{obj.price:,} {obj.dealer.currency}'.replace(',', ' ')
+        return formatting.format_price(obj.price, obj.dealer.currency)
 
     @display(description='Статус', label={
         Car.Status.FOR_SALE: 'success',

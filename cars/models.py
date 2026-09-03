@@ -44,6 +44,21 @@ class Dealer(models.Model):
         'Валюта цен', max_length=3,
         choices=Currency.choices, default=Currency.USD,
     )
+    secondary_currency = models.CharField(
+        'Дополнительная валюта', max_length=3,
+        choices=Currency.choices, blank=True,
+        help_text='Необязательно. Если заполнено, цена на сайте '
+                  'показывается сразу в двух валютах — курс для '
+                  'пересчёта указывается ниже.',
+    )
+    exchange_rate = models.DecimalField(
+        'Курс обмена', max_digits=10, decimal_places=4,
+        null=True, blank=True,
+        help_text='Сколько единиц дополнительной валюты за 1 единицу '
+                  'основной (например, при основной $ и дополнительной '
+                  '₴ — сколько гривен за доллар). Вводится вручную, '
+                  'курс не подтягивается автоматически откуда-либо.',
+    )
 
     class Meta:
         verbose_name = 'автосалон'
@@ -107,6 +122,13 @@ class Car(models.Model):
     drive = models.CharField('Привод', max_length=3, choices=Drive.choices)
     body = models.CharField('Кузов', max_length=10, choices=Body.choices)
     vin = models.CharField('VIN', max_length=17, blank=True)
+    accident = models.BooleanField('Был в ДТП', default=False)
+    imported_from = models.CharField(
+        'Пригнан из', max_length=50, blank=True,
+        help_text='Свободный текст, например: США, Германия, Литва. '
+                  'Пусто, если машина не пригнана.',
+    )
+    negotiable = models.BooleanField('Торг уместен', default=False)
     description = models.TextField('Описание', blank=True)
     internal_note = models.TextField(
         'Внутренняя заметка', blank=True,
