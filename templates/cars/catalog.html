@@ -1,6 +1,120 @@
 {% extends 'base.html' %}
+{% load static car_extras %}
 
-{% block content %}
-<h1>Premium Cars Warsaw</h1>
-<p>Каркас проекта работает. Каталог автомобилей появится на следующих этапах.</p>
+{% block body %}
+<header class="site-header">
+    <div class="container">
+        <div class="site-header__bar">
+            <div class="site-header__name">{{ dealer.name }}</div>
+            <div class="site-header__links">
+                {% if dealer.phone %}
+                <a class="icon-btn" href="tel:{{ dealer.phone }}" aria-label="Позвонить">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+                </a>
+                {% endif %}
+                {% if dealer.telegram %}
+                <a class="icon-btn" href="https://t.me/{{ dealer.telegram|cut:'@' }}" aria-label="Telegram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 3.5 2.5 11l7 2.5 2.5 7z"/><path d="m9.5 13.5 4-4"/></svg>
+                </a>
+                {% endif %}
+                {% if dealer.instagram %}
+                <a class="icon-btn" href="{{ dealer.instagram }}" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h1 class="site-header__lead">{{ cars|length }} {{ cars|length|plural_ru:'автомобиль,автомобиля,автомобилей' }} <em>в наличии</em></h1>
+
+        {% if dealer.description %}
+        <p class="site-header__about">{{ dealer.description }}</p>
+        {% endif %}
+    </div>
+</header>
+
+<main class="container">
+    <div class="catalog-bar">
+        <h2 class="catalog-bar__count">Каталог</h2>
+        <p class="catalog-bar__note">Сначала новые</p>
+    </div>
+
+    {% if cars %}
+    <ul class="catalog-grid">
+        {% for car in cars %}
+        <li class="car-card{% if car.status != 'for_sale' %} car-card--inactive{% endif %}">
+            <div class="car-card__media">
+                {% if car.images.all %}
+                {# Its own little carousel, so photos can be browsed without opening the car. #}
+                <div class="car-card__strip" data-card-strip>
+                    {% for image in car.images.all %}
+                    <div class="car-card__frame">
+                        <img class="car-card__photo" src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }} {{ car.year }} — фото {{ forloop.counter }}" loading="lazy" width="400" height="500">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="car-card__placeholder" aria-hidden="true">
+                    <svg viewBox="0 0 200 80" fill="currentColor"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+                </div>
+                {% endif %}
+
+                {# Covers the photo so the whole card is clickable; the arrows sit above it. #}
+                <a class="car-card__overlay" href="{% url 'cars:car_detail' car.slug %}" tabindex="-1" aria-hidden="true"></a>
+
+                {% if car.images.all|length > 1 %}
+                <button class="card-nav card-nav--prev" type="button" data-card-prev hidden aria-label="Предыдущее фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+                </button>
+                <button class="card-nav card-nav--next" type="button" data-card-next hidden aria-label="Следующее фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+
+                <div class="card-dots" data-card-dots aria-hidden="true">
+                    {% for image in car.images.all %}
+                    <span class="card-dots__dot{% if forloop.first %} is-active{% endif %}"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if car.status == 'reserved' %}
+                <span class="car-card__status">{{ car.get_status_display }}</span>
+                {% elif car.status == 'sold' %}
+                <span class="car-card__status car-card__status--sold">{{ car.get_status_display }}</span>
+                {% endif %}
+
+                <span class="car-card__price">{{ car.price|money:dealer.currency }}</span>
+            </div>
+
+            <a class="car-card__text" href="{% url 'cars:car_detail' car.slug %}">
+                <h3 class="car-card__title">{{ car.brand }} {{ car.model }}</h3>
+                <p class="car-card__specs">{{ car.year }} · {{ car.mileage_km|spaced }} км<br>{{ car.get_fuel_display|lower }}{% if car.engine_capacity %} {{ car.engine_capacity }}{% endif %} · {{ car.get_transmission_display|lower }}</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">Пока нет автомобилей в каталоге.</p>
+    {% endif %}
+</main>
+
+{% if dealer.telegram or dealer.phone %}
+<div class="contact-bar">
+    {% if dealer.telegram %}
+    <a class="btn btn--primary" href="https://t.me/{{ dealer.telegram|cut:'@' }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 3.5 2.5 11l7 2.5 2.5 7z"/><path d="m9.5 13.5 4-4"/></svg>
+        Написать в Telegram
+    </a>
+    {% endif %}
+    {% if dealer.phone %}
+    <a class="btn btn--ghost btn--icon-only" href="tel:{{ dealer.phone }}" aria-label="Позвонить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% include 'partials/site_footer.html' %}
+
+<script src="{% static 'js/gallery.js' %}" defer></script>
 {% endblock %}

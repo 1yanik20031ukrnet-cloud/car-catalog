@@ -1,0 +1,30 @@
+<footer class="site-footer">
+    <div class="container site-footer__inner">
+        <div class="site-footer__brand">
+            <div class="site-footer__name">{{ dealer.name }}</div>
+            {% if dealer.description %}
+            <p class="site-footer__about">{{ dealer.description }}</p>
+            {% endif %}
+        </div>
+
+        <nav class="site-footer__col" aria-label="Разделы сайта">
+            <h2 class="site-footer__title">Сайт</h2>
+            <a href="{% url 'cars:catalog' %}">Каталог автомобилей</a>
+            <a href="{% url 'cars:privacy' %}">Политика конфиденциальности</a>
+            <a href="{% url 'cars:terms' %}">Условия использования</a>
+        </nav>
+
+        {% if dealer.phone or dealer.telegram or dealer.instagram %}
+        <div class="site-footer__col">
+            <h2 class="site-footer__title">Связаться</h2>
+            {% if dealer.phone %}<a href="tel:{{ dealer.phone }}">{{ dealer.phone }}</a>{% endif %}
+            {% if dealer.telegram %}<a href="https://t.me/{{ dealer.telegram|cut:'@' }}">Telegram</a>{% endif %}
+            {% if dealer.instagram %}<a href="{{ dealer.instagram }}">Instagram</a>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <p class="site-footer__legal">© {% now 'Y' %} {{ dealer.name }}</p>
+    </div>
+</footer>

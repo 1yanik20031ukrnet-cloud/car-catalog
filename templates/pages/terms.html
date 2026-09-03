@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Условия использования — {{ dealer.name }}{% endblock %}
+{% block description %}Условия использования сайта {{ dealer.name }}.{% endblock %}
+
+{% block body %}
+<div class="container">
+    <a class="back-link" href="{% url 'cars:catalog' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5m6 6-6-6 6-6"/></svg>
+        Ко всем автомобилям
+    </a>
+</div>
+
+<main class="container legal">
+    <h1 class="legal__title">Условия использования</h1>
+
+    <div class="legal__notice">
+        <p><strong>Страница ждёт текста.</strong></p>
+        <p>Условия использования должны написать владельцы салона. Придумывать
+        их за вас нельзя: это обязательства перед клиентом.</p>
+        <p>Что обычно сюда входит: что цены и наличие на сайте не являются
+        публичной офертой и уточняются при обращении, что характеристики
+        автомобилей указаны со слов продавца и проверяются при осмотре, и на
+        каких условиях работает запись на просмотр.</p>
+        <p>Готовый текст вставьте в <code>templates/pages/terms.html</code>
+        вместо этого блока.</p>
+    </div>
+</main>
+
+{% include 'partials/site_footer.html' %}
+{% endblock %}
