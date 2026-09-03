@@ -1,26 +1,453 @@
-/* Mobile-first base styles. Design work happens in stage 3+. */
+/* Premium Cars — mobile-first catalog styles.
+   Direction C: Instagram-native feed. Vertical 4:5 photos, price on the
+   photo, compact spec line, sticky contact bar on mobile. */
+
+/* ---------- Design tokens ---------- */
 
 :root {
-    --color-bg: #ffffff;
-    --color-text: #111111;
-    --color-accent: #0a84ff;
+    --bg: #ffffff;
+    --surface: #f7f6f4;
+    --chip: #f0efec;
+    --line: #eceae6;
+    --line-strong: #d9d7d2;
+
+    --ink: #16150f;
+    --ink-muted: #6b6862;
+    --on-dark: #ffffff;
+
+    --accent: #2743e8;
+    --accent-hover: #1a2fae;
+    --reserved: #e8622c;
+    --sold: #6b6862;
+
+    --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --font-body: "DM Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+    --r-card: 14px;
+    --r-btn: 14px;
+    --r-pill: 999px;
+
+    --page-x: 16px;
+    --tap: 44px;
 }
 
-* {
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
     box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+p,
+ul,
+figure {
     margin: 0;
     padding: 0;
 }
 
+ul {
+    list-style: none;
+}
+
 body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
     line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 0 var(--page-x);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- Site header ---------- */
+
+.site-header {
+    padding: 18px 0 20px;
+}
+
+.site-header__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-header__name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+}
+
+.site-header__links {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap);
+    height: var(--tap);
+    border-radius: var(--r-pill);
+    background: var(--chip);
+    color: var(--ink);
+}
+
+.icon-btn:hover {
+    background: var(--line-strong);
+}
+
+.icon-btn svg {
+    width: 19px;
+    height: 19px;
+}
+
+.site-header__lead {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(25px, 7vw, 30px);
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+    text-wrap: pretty;
+    margin-top: 16px;
+}
+
+.site-header__lead em {
+    font-style: normal;
+    color: var(--accent);
+}
+
+.site-header__about {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    max-width: 46ch;
+    text-wrap: pretty;
+    margin-top: 10px;
+}
+
+/* ---------- Catalog heading ---------- */
+
+.catalog-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0 16px;
+}
+
+.catalog-bar__count {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.015em;
+}
+
+.catalog-bar__note {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+}
+
+/* ---------- Card grid ---------- */
+
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 12px;
+    padding-bottom: 32px;
+}
+
+/* ---------- Car card ---------- */
+
+.car-card {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.car-card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    background: var(--surface);
+}
+
+.car-card__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.car-card__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--ink);
+    opacity: 0.14;
+}
+
+.car-card__placeholder svg {
+    width: 56%;
+    height: auto;
+}
+
+.car-card__price {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 7px 12px;
+    border-radius: var(--r-pill);
+    background: var(--ink);
+    color: var(--on-dark);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14.5px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.car-card__status {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    padding: 5px 10px;
+    border-radius: var(--r-pill);
+    background: var(--reserved);
+    color: var(--on-dark);
+    font-weight: 500;
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+}
+
+.car-card__status--sold {
+    background: var(--sold);
+}
+
+.car-card--inactive .car-card__photo,
+.car-card--inactive .car-card__placeholder {
+    opacity: 0.62;
+}
+
+.car-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.22;
+    letter-spacing: -0.02em;
+    text-wrap: pretty;
+    /* Reserve two lines so spec lines stay on one baseline across a row
+       even when a name like "Volkswagen Tiguan 2.0 TSI" wraps. */
+    min-height: calc(2 * 1.22em);
+}
+
+.car-card__specs {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--ink-muted);
+}
+
+/* ---------- Empty state ---------- */
+
+.empty {
+    padding: 48px 0 64px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 14px;
+}
+
+/* ---------- Sticky contact bar (mobile only) ---------- */
+
+.contact-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    padding: 10px var(--page-x) calc(10px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    -webkit-backdrop-filter: blur(8px); /* Safari, including current iOS */
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--tap);
+    padding: 12px 18px;
+    border-radius: var(--r-btn);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.btn--primary {
+    flex-grow: 1;
+    background: var(--ink);
+    color: var(--on-dark);
+}
+
+.btn--primary:hover {
+    background: var(--accent);
+}
+
+.btn--ghost {
+    border: 1.5px solid var(--line-strong);
+    color: var(--ink);
+}
+
+.btn--ghost:hover {
+    border-color: var(--ink);
+}
+
+.btn--icon-only {
+    width: 52px;
+    padding: 12px 0;
+}
+
+.btn svg {
+    width: 19px;
+    height: 19px;
+}
+
+/* ---------- Site footer ---------- */
+
+.site-footer {
+    padding: 28px 0 36px;
+    border-top: 1px solid var(--line);
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-muted);
+}
+
+/* The flex column lives on the inner container: an auto-margin flex item
+   shrinks to its content instead of holding the page width. */
+.site-footer .container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.site-footer a:hover {
+    color: var(--accent);
+}
+
+/* ---------- Wider screens ---------- */
+
+@media (min-width: 700px) {
+    :root {
+        --page-x: 32px;
+    }
+
+    .site-header {
+        padding: 26px 0 30px;
+    }
+
+    .catalog-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 30px 20px;
+    }
+
+    .car-card__title {
+        font-size: 16px;
+    }
+
+    .car-card__specs {
+        font-size: 12.5px;
+    }
+
+    .car-card__price {
+        left: 10px;
+        bottom: 10px;
+        font-size: 16px;
+        padding: 8px 14px;
+    }
+
+    /* Past mobile the bar stops floating and becomes a normal CTA row,
+       so it needs the page gutters back. */
+    .contact-bar {
+        position: static;
+        justify-content: flex-start;
+        max-width: 1180px;
+        margin: 4px auto 0;
+        padding: 0 var(--page-x);
+        border: 0;
+        background: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .contact-bar .btn--primary {
+        flex-grow: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --page-x: 40px;
+    }
+
+    .site-header__bar {
+        gap: 24px;
+    }
+
+    .site-header__lead {
+        font-size: 44px;
+        max-width: 16ch;
+    }
+
+    .catalog-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 34px 22px;
+    }
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+    .car-card__media,
+    .btn,
+    .icon-btn {
+        transition: background-color 0.16s ease, border-color 0.16s ease,
+            transform 0.16s ease;
+    }
+
+    .car-card:hover .car-card__media {
+        transform: translateY(-2px);
+    }
 }

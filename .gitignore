@@ -10,6 +10,10 @@ media/
 # Secrets
 .env
 
+# Design mockups: keep the small artboard sources, skip the 2.5 MB canvas
+# that is rebuilt from them.
+design/car-catalog-directions.html
+
 # OS / IDE
 .DS_Store
 .vscode/

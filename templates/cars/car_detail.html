@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load car_extras %}
 
 {% block title %}{{ car.brand }} {{ car.model }} {{ car.year }}{% endblock %}
+{% block description %}{{ car.brand }} {{ car.model }} {{ car.year }} — {{ car.mileage_km|spaced }} км, {{ car.get_fuel_display|lower }}, {{ car.price|money:car.dealer.currency }}. {{ car.dealer.name }}.{% endblock %}
 
 {% block content %}
 <a href="{% url 'cars:catalog' %}">&larr; Ко всем автомобилям</a>
@@ -17,7 +19,7 @@
     {% endfor %}
 </div>
 
-<p><strong>{{ car.price }} {{ car.dealer.currency }}</strong></p>
+<p><strong>{{ car.price|money:car.dealer.currency }}</strong></p>
 
 <ul>
     <li>Год: {{ car.year }}</li>

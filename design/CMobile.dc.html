@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #2743e8; text-decoration: none; }
+    a:hover { color: #1a2fae; }
+    .ph { position: relative; overflow: hidden; background: #e4e3e0; border-radius: 18px; }
+    .ph svg.car { position: absolute; inset: 0; margin: auto; opacity: .16; }
+    .ph b { position: absolute; right: 12px; top: 12px; font: 500 10px/1 'DM Sans', sans-serif; letter-spacing: .08em; color: #8d8b86; }
+    .disp { font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif; }
+    .chip { padding: 6px 10px; border-radius: 999px; background: #f0efec; font: 500 11.5px/1 'DM Sans', sans-serif; color: #37352f; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #ffffff; color: #16150f; font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif; padding-bottom: 100px;">
+
+  <div style="display: flex; flex-direction: column; gap: 16px; padding: 18px 16px 16px 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="disp" style="font-weight: 800; font-size: 19px; letter-spacing: -.02em;">Premium Cars</div>
+      <div style="display: flex; gap: 8px;">
+        <div style="width: 38px; height: 38px; border-radius: 999px; background: #f0efec; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#37352f" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+        </div>
+        <div style="width: 38px; height: 38px; border-radius: 999px; background: #f0efec; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#37352f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 3.5 2.5 11l7 2.5 2.5 7z"/><path d="m9.5 13.5 4-4"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="disp" style="font-weight: 700; font-size: 27px; line-height: 1.14; letter-spacing: -.025em; text-wrap: pretty;">16 машин из Европы,<br>уже в Киеве</div>
+    <div style="font-size: 13.5px; line-height: 1.5; color: #6b6862;">VIN-отчёт и история обслуживания к каждой. Бронь по предоплате — пишите в Telegram.</div>
+  </div>
+
+  <div style="display: flex; gap: 8px; padding: 4px 16px 16px 16px; overflow: hidden;">
+    <div style="padding: 9px 15px; border-radius: 999px; background: #16150f; color: #fff; font: 500 12.5px/1 'DM Sans', sans-serif; white-space: nowrap;">Все 16</div>
+    <div class="chip" style="white-space: nowrap;">Кроссоверы</div>
+    <div class="chip" style="white-space: nowrap;">Седаны</div>
+    <div class="chip" style="white-space: nowrap;">до $40k</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 26px; padding: 0 16px;">
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="ph" style="height: 420px;">
+        <div style="position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 9px 15px; border-radius: 999px; background: #16150f; color: #fff;" class="disp"><span style="font-weight: 700; font-size: 17px; letter-spacing: -.01em;">$74 500</span></div>
+        <svg class="car" width="170" height="68" viewBox="0 0 200 80" fill="#16150f"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+        <b>ФОТО 4:5</b>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="disp" style="font-weight: 700; font-size: 20px; letter-spacing: -.02em;">Porsche Cayenne · 2020</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div class="chip">58 000 км</div><div class="chip">бензин 3.0</div><div class="chip">340 л.с.</div><div class="chip">полный</div>
+        </div>
+        <div style="text-align: center; padding: 14px 0; border-radius: 14px; background: #2743e8; color: #fff; font-weight: 500; font-size: 14px;">Смотреть и записаться</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="ph" style="height: 420px;">
+        <div style="position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 9px 15px; border-radius: 999px; background: #16150f; color: #fff;" class="disp"><span style="font-weight: 700; font-size: 17px; letter-spacing: -.01em;">$46 900</span></div>
+        <svg class="car" width="170" height="68" viewBox="0 0 200 80" fill="#16150f"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+        <b>ФОТО 4:5</b>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="disp" style="font-weight: 700; font-size: 20px; letter-spacing: -.02em;">Mercedes-Benz GLC 300 · 2021</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div class="chip">61 000 км</div><div class="chip">бензин 2.0</div><div class="chip">258 л.с.</div><div class="chip">полный</div>
+        </div>
+        <div style="text-align: center; padding: 14px 0; border-radius: 14px; background: #2743e8; color: #fff; font-weight: 500; font-size: 14px;">Смотреть и записаться</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="ph" style="height: 420px;">
+        <div style="position: absolute; left: 12px; top: 12px; z-index: 2; padding: 7px 13px; border-radius: 999px; background: #e8622c; color: #fff; font: 500 11px/1 'DM Sans', sans-serif; letter-spacing: .04em;">Зарезервирован</div>
+        <div style="position: absolute; left: 12px; bottom: 12px; z-index: 2; padding: 9px 15px; border-radius: 999px; background: #16150f; color: #fff;" class="disp"><span style="font-weight: 700; font-size: 17px; letter-spacing: -.01em;">$44 900</span></div>
+        <svg class="car" width="170" height="68" viewBox="0 0 200 80" fill="#16150f"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+        <b>ФОТО 4:5</b>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="disp" style="font-weight: 700; font-size: 20px; letter-spacing: -.02em;">Audi Q7 50 TDI · 2019</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <div class="chip">105 000 км</div><div class="chip">дизель 3.0</div><div class="chip">286 л.с.</div><div class="chip">полный</div>
+        </div>
+        <div style="text-align: center; padding: 14px 0; border-radius: 14px; border: 1.5px solid #d9d7d2; color: #37352f; font-weight: 500; font-size: 14px;">Смотреть · есть бронь</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="position: sticky; bottom: 0; margin-top: 26px; display: flex; gap: 10px; padding: 12px 16px 16px 16px; background: rgba(255,255,255,.94); border-top: 1px solid #eceae6;">
+    <div style="flex-grow: 1; text-align: center; padding: 15px 0; border-radius: 14px; background: #16150f; color: #fff; font-weight: 500; font-size: 14px;">Написать в Telegram</div>
+    <div style="width: 52px; border-radius: 14px; border: 1.5px solid #d9d7d2; display: flex; align-items: center; justify-content: center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#37352f" stroke-width="1.7" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

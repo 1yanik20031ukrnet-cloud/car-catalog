@@ -4,12 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Premium Cars Warsaw{% endblock %}</title>
+    <title>{% block title %}{{ dealer.name|default:'Каталог автомобилей' }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ dealer.description }}{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500&display=swap">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+    {% block body %}
+    {# Default shell, still used by the car page until its own layout task. #}
     <main class="container">
         {% block content %}{% endblock %}
     </main>
+    {% endblock %}
 </body>
 </html>
