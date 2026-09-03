@@ -27,4 +27,17 @@ def car_detail(request, slug):
         Car.objects.select_related('dealer').prefetch_related('images'),
         slug=slug,
     )
-    return render(request, 'cars/car_detail.html', {'car': car})
+    return render(request, 'cars/car_detail.html', {
+        'car': car,
+        'dealer': car.dealer,
+    })
+
+
+def privacy(request):
+    """Privacy policy. The text itself is the owners' to write."""
+    return render(request, 'pages/privacy.html', {'dealer': Dealer.objects.first()})
+
+
+def terms(request):
+    """Terms of use. The text itself is the owners' to write."""
+    return render(request, 'pages/terms.html', {'dealer': Dealer.objects.first()})

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Политика конфиденциальности — {{ dealer.name }}{% endblock %}
+{% block description %}Как {{ dealer.name }} обрабатывает персональные данные посетителей сайта.{% endblock %}
+
+{% block body %}
+<div class="container">
+    <a class="back-link" href="{% url 'cars:catalog' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5m6 6-6-6 6-6"/></svg>
+        Ко всем автомобилям
+    </a>
+</div>
+
+<main class="container legal">
+    <h1 class="legal__title">Политика конфиденциальности</h1>
+
+    <div class="legal__notice">
+        <p><strong>Страница ждёт текста.</strong></p>
+        <p>Политику конфиденциальности должны написать владельцы салона — это
+        юридический документ, и он зависит от того, какие данные вы собираете,
+        кто владелец сайта и по праву какой страны вы работаете. Текст-заглушку
+        здесь ставить нельзя: она вводит клиента в заблуждение.</p>
+        <p>Что понадобится описать как минимум: какие данные вы получаете из
+        формы записи на просмотр (имя и телефон), зачем они нужны, сколько вы их
+        храните, кому передаёте, и как человек может попросить их удалить.</p>
+        <p>Готовый текст вставьте в <code>templates/pages/privacy.html</code>
+        вместо этого блока.</p>
+    </div>
+</main>
+
+{% include 'partials/site_footer.html' %}
+{% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load car_extras %}
+{% load static car_extras %}
 
 {% block body %}
 <header class="site-header">
@@ -42,26 +42,51 @@
     {% if cars %}
     <ul class="catalog-grid">
         {% for car in cars %}
-        <li>
-            <a class="car-card{% if car.status != 'for_sale' %} car-card--inactive{% endif %}" href="{% url 'cars:car_detail' car.slug %}">
-                <div class="car-card__media">
-                    {% if car.main_image %}
-                    <img class="car-card__photo" src="{{ car.main_image.image.url }}" alt="{{ car.brand }} {{ car.model }} {{ car.year }}" loading="lazy" width="400" height="500">
-                    {% else %}
-                    <div class="car-card__placeholder" aria-hidden="true">
-                        <svg viewBox="0 0 200 80" fill="currentColor"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+        <li class="car-card{% if car.status != 'for_sale' %} car-card--inactive{% endif %}">
+            <div class="car-card__media">
+                {% if car.images.all %}
+                {# Its own little carousel, so photos can be browsed without opening the car. #}
+                <div class="car-card__strip" data-card-strip>
+                    {% for image in car.images.all %}
+                    <div class="car-card__frame">
+                        <img class="car-card__photo" src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }} {{ car.year }} — фото {{ forloop.counter }}" loading="lazy" width="400" height="500">
                     </div>
-                    {% endif %}
-
-                    {% if car.status == 'reserved' %}
-                    <span class="car-card__status">{{ car.get_status_display }}</span>
-                    {% elif car.status == 'sold' %}
-                    <span class="car-card__status car-card__status--sold">{{ car.get_status_display }}</span>
-                    {% endif %}
-
-                    <span class="car-card__price">{{ car.price|money:dealer.currency }}</span>
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="car-card__placeholder" aria-hidden="true">
+                    <svg viewBox="0 0 200 80" fill="currentColor"><path d="M14 58c0-4 3-7 7-7h158c4 0 7 3 7 7v4H14zM24 51l14-24c2-4 6-6 10-6h96c4 0 8 2 10 6l14 24z"/><circle cx="52" cy="62" r="11"/><circle cx="148" cy="62" r="11"/></svg>
+                </div>
+                {% endif %}
 
+                {# Covers the photo so the whole card is clickable; the arrows sit above it. #}
+                <a class="car-card__overlay" href="{% url 'cars:car_detail' car.slug %}" tabindex="-1" aria-hidden="true"></a>
+
+                {% if car.images.all|length > 1 %}
+                <button class="card-nav card-nav--prev" type="button" data-card-prev hidden aria-label="Предыдущее фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+                </button>
+                <button class="card-nav card-nav--next" type="button" data-card-next hidden aria-label="Следующее фото">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+
+                <div class="card-dots" data-card-dots aria-hidden="true">
+                    {% for image in car.images.all %}
+                    <span class="card-dots__dot{% if forloop.first %} is-active{% endif %}"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if car.status == 'reserved' %}
+                <span class="car-card__status">{{ car.get_status_display }}</span>
+                {% elif car.status == 'sold' %}
+                <span class="car-card__status car-card__status--sold">{{ car.get_status_display }}</span>
+                {% endif %}
+
+                <span class="car-card__price">{{ car.price|money:dealer.currency }}</span>
+            </div>
+
+            <a class="car-card__text" href="{% url 'cars:car_detail' car.slug %}">
                 <h3 class="car-card__title">{{ car.brand }} {{ car.model }}</h3>
                 <p class="car-card__specs">{{ car.year }} · {{ car.mileage_km|spaced }} км<br>{{ car.get_fuel_display|lower }}{% if car.engine_capacity %} {{ car.engine_capacity }}{% endif %} · {{ car.get_transmission_display|lower }}</p>
             </a>
@@ -89,10 +114,7 @@
 </div>
 {% endif %}
 
-<footer class="site-footer">
-    <div class="container">
-        {% if dealer.phone %}<div><a href="tel:{{ dealer.phone }}">{{ dealer.phone }}</a></div>{% endif %}
-        <div>{{ dealer.name }}</div>
-    </div>
-</footer>
+{% include 'partials/site_footer.html' %}
+
+<script src="{% static 'js/gallery.js' %}" defer></script>
 {% endblock %}

@@ -7,4 +7,6 @@ app_name = 'cars'
 urlpatterns = [
     path('', views.catalog, name='catalog'),
     path('cars/<slug:slug>/', views.car_detail, name='car_detail'),
+    path('privacy/', views.privacy, name='privacy'),
+    path('terms/', views.terms, name='terms'),
 ]

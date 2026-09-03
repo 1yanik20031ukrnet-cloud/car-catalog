@@ -6,10 +6,22 @@
 
 {% block body %}
 <div class="container">
-    <a class="back-link" href="{% url 'cars:catalog' %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5m6 6-6-6 6-6"/></svg>
-        Ко всем автомобилям
-    </a>
+    <nav class="crumbs" aria-label="Хлебные крошки">
+        <ol class="crumbs__list">
+            <li class="crumbs__item">
+                <a href="{% url 'cars:catalog' %}">Каталог</a>
+                <svg class="crumbs__sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </li>
+            {# The body type is not a link yet: filtering arrives in stage 3. #}
+            <li class="crumbs__item">
+                <span>{{ car.get_body_display }}</span>
+                <svg class="crumbs__sep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </li>
+            <li class="crumbs__item">
+                <span aria-current="page">{{ car.brand }} {{ car.model }}</span>
+            </li>
+        </ol>
+    </nav>
 </div>
 
 <article class="car">
@@ -17,7 +29,7 @@
     <section class="gallery" aria-label="Фотографии автомобиля">
         {# Badges sit outside the scroller, or they would scroll away with the photos. #}
         <div class="gallery__viewport">
-            <div class="gallery__stage" id="gallery-stage">
+            <div class="gallery__stage" id="gallery-stage" tabindex="0">
                 {% for image in car.images.all %}
                 <figure class="gallery__slide" id="photo-{{ forloop.counter }}">
                     <img src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }} {{ car.year }} — фото {{ forloop.counter }}"
@@ -30,13 +42,25 @@
             <span class="gallery__status{% if car.status == 'sold' %} gallery__status--sold{% endif %}">{{ car.get_status_display }}</span>
             {% endif %}
 
+            <button class="gallery__zoom" type="button" data-lightbox-open hidden aria-label="Открыть фото на весь экран">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-8 8M3 21l8-8"/></svg>
+            </button>
+
             {% if car.images.all|length > 1 %}
             <span class="gallery__counter"><span data-gallery-current>1</span> / {{ car.images.all|length }}</span>
+
+            {# Hidden until the script wires them up: without it they would do nothing. #}
+            <button class="gallery__nav gallery__nav--prev" type="button" data-gallery-prev hidden aria-label="Предыдущее фото">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            </button>
+            <button class="gallery__nav gallery__nav--next" type="button" data-gallery-next hidden aria-label="Следующее фото">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
             {% endif %}
         </div>
 
         {% if car.images.all|length > 1 %}
-        <div class="gallery__thumbs" role="tablist" aria-label="Выбрать фотографию">
+        <div class="gallery__thumbs" aria-label="Выбрать фотографию">
             {% for image in car.images.all %}
             <a class="gallery__thumb{% if forloop.first %} is-active{% endif %}" href="#photo-{{ forloop.counter }}"
                data-gallery-thumb="{{ forloop.counter0 }}" aria-label="Фото {{ forloop.counter }}">
@@ -46,56 +70,123 @@
         </div>
         {% endif %}
     </section>
+
+    {# Native <dialog>: Esc and the backdrop come free, no library needed. #}
+    <dialog class="lightbox" id="lightbox" aria-label="Фотографии во весь экран">
+        <div class="lightbox__stage" id="lightbox-stage" tabindex="0">
+            {% for image in car.images.all %}
+            <figure class="lightbox__slide">
+                <img src="{{ image.image.url }}" alt="{{ car.brand }} {{ car.model }} {{ car.year }} — фото {{ forloop.counter }}" loading="lazy">
+            </figure>
+            {% endfor %}
+        </div>
+
+        {% if car.images.all|length > 1 %}
+        <span class="lightbox__counter"><span data-lightbox-current>1</span> / {{ car.images.all|length }}</span>
+        <button class="gallery__nav gallery__nav--prev" type="button" data-lightbox-prev aria-label="Предыдущее фото">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+        </button>
+        <button class="gallery__nav gallery__nav--next" type="button" data-lightbox-next aria-label="Следующее фото">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+        {% endif %}
+
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="Закрыть">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+    </dialog>
     {% endif %}
 
     <div class="container car__body">
-        <header class="car__head">
-            <h1 class="car__title">{{ car.brand }} {{ car.model }}</h1>
-            <p class="car__subtitle">{{ car.year }} · {{ car.mileage_km|spaced }} км · {{ car.get_body_display|lower }}</p>
-            <p class="car__price">{{ car.price|money:car.dealer.currency }}</p>
-        </header>
+        <div class="car__layout">
+            <div class="car__main">
+                <header class="car__head">
+                    <h1 class="car__title">{{ car.brand }} {{ car.model }}</h1>
+                    <p class="car__subtitle">{{ car.year }} · {{ car.get_body_display|lower }} · {{ car.get_fuel_display|lower }}{% if car.engine_capacity %} {{ car.engine_capacity }} л{% endif %} · {{ car.power_hp }} л.с.</p>
 
-        <section class="specs">
-            <h2 class="specs__heading">Характеристики</h2>
+                    <div class="car__price-row">
+                        <p class="car__price">{{ car.price|money:car.dealer.currency }}</p>
+                        {% if car.status != 'for_sale' %}
+                        <span class="chip chip--{{ car.status }}">{{ car.get_status_display }}</span>
+                        {% endif %}
+                    </div>
+                </header>
 
-            <div class="specs__group">
-                <h3 class="specs__group-title">Основное</h3>
-                <dl class="specs__list">
-                    <div class="specs__row"><dt>Год выпуска</dt><dd>{{ car.year }}</dd></div>
-                    <div class="specs__row"><dt>Пробег</dt><dd>{{ car.mileage_km|spaced }} км</dd></div>
-                    <div class="specs__row"><dt>Кузов</dt><dd>{{ car.get_body_display }}</dd></div>
-                </dl>
+                {% include 'partials/car_facts.html' %}
+
+                {% if car.description %}
+                <section class="section">
+                    <h2 class="section__title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h9l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5M8 13h8M8 17h5"/></svg>
+                        Описание
+                    </h2>
+                    <div class="prose">{{ car.description|linebreaks }}</div>
+                </section>
+                {% endif %}
+
+                <section class="section">
+                    <h2 class="section__title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+                        Технические характеристики
+                    </h2>
+
+                    <div class="spec-grid">
+                        <div class="spec-card">
+                            <h3 class="spec-card__title">Двигатель и трансмиссия</h3>
+                            <dl class="specs__list">
+                                <div class="specs__row"><dt>Топливо</dt><dd>{{ car.get_fuel_display }}</dd></div>
+                                {% if car.engine_capacity %}
+                                <div class="specs__row"><dt>Объём двигателя</dt><dd>{{ car.engine_capacity }} л</dd></div>
+                                {% endif %}
+                                <div class="specs__row"><dt>Мощность</dt><dd>{{ car.power_hp }} л.с.</dd></div>
+                                <div class="specs__row"><dt>Коробка передач</dt><dd>{{ car.get_transmission_display }}</dd></div>
+                                <div class="specs__row"><dt>Привод</dt><dd>{{ car.get_drive_display }}</dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="spec-card">
+                            <h3 class="spec-card__title">Кузов и состояние</h3>
+                            <dl class="specs__list">
+                                <div class="specs__row"><dt>Тип кузова</dt><dd>{{ car.get_body_display }}</dd></div>
+                                <div class="specs__row"><dt>Год выпуска</dt><dd>{{ car.year }}</dd></div>
+                                <div class="specs__row"><dt>Пробег</dt><dd>{{ car.mileage_km|spaced }} км</dd></div>
+                                <div class="specs__row"><dt>Статус</dt><dd>{{ car.get_status_display }}</dd></div>
+                                {% if car.vin %}
+                                <div class="specs__row"><dt>VIN</dt><dd class="specs__vin">{{ car.vin }}</dd></div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="specs__group">
-                <h3 class="specs__group-title">Двигатель и трансмиссия</h3>
-                <dl class="specs__list">
-                    <div class="specs__row"><dt>Топливо</dt><dd>{{ car.get_fuel_display }}</dd></div>
-                    {% if car.engine_capacity %}
-                    <div class="specs__row"><dt>Объём</dt><dd>{{ car.engine_capacity }} л</dd></div>
+            <aside class="car__aside" aria-label="Цена и контакты">
+                <div class="offer">
+                    <p class="offer__price">{{ car.price|money:car.dealer.currency }}</p>
+                    <p class="offer__car">{{ car.brand }} {{ car.model }} · {{ car.year }}</p>
+                    <p class="offer__meta">{{ car.mileage_km|spaced }} км · {{ car.get_fuel_display|lower }} · {{ car.get_transmission_display|lower }}</p>
+
+                    {% if car.status != 'for_sale' %}
+                    <p class="offer__status offer__status--{{ car.status }}">{{ car.get_status_display }}</p>
                     {% endif %}
-                    <div class="specs__row"><dt>Мощность</dt><dd>{{ car.power_hp }} л.с.</dd></div>
-                    <div class="specs__row"><dt>Коробка</dt><dd>{{ car.get_transmission_display }}</dd></div>
-                    <div class="specs__row"><dt>Привод</dt><dd>{{ car.get_drive_display }}</dd></div>
-                </dl>
-            </div>
 
-            {% if car.vin %}
-            <div class="specs__group">
-                <h3 class="specs__group-title">Документы</h3>
-                <dl class="specs__list">
-                    <div class="specs__row"><dt>VIN</dt><dd class="specs__vin">{{ car.vin }}</dd></div>
-                </dl>
-            </div>
-            {% endif %}
-        </section>
-
-        {% if car.description %}
-        <section class="about">
-            <h2 class="about__heading">Описание от продавца</h2>
-            <p class="about__text">{{ car.description|linebreaksbr }}</p>
-        </section>
-        {% endif %}
+                    <div class="offer__actions">
+                        {% if car.dealer.telegram %}
+                        <a class="btn btn--primary" href="https://t.me/{{ car.dealer.telegram|cut:'@' }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l7 2.5 2.5 7z"/><path d="m9.5 13.5 4-4"/></svg>
+                            Написать в Telegram
+                        </a>
+                        {% endif %}
+                        {% if car.dealer.phone %}
+                        <a class="btn btn--ghost" href="tel:{{ car.dealer.phone }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+                            {{ car.dealer.phone }}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+        </div>
     </div>
 </article>
 
@@ -114,6 +205,8 @@
     {% endif %}
 </div>
 {% endif %}
+
+{% include 'partials/site_footer.html' %}
 
 <script src="{% static 'js/gallery.js' %}" defer></script>
 {% endblock %}
