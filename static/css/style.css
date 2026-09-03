@@ -279,6 +279,244 @@ a {
     color: var(--ink-muted);
 }
 
+/* ---------- Car page: back link ---------- */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--tap);
+    font-size: 13.5px;
+    color: var(--ink-muted);
+}
+
+.back-link:hover {
+    color: var(--ink);
+}
+
+.back-link svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ---------- Car page: gallery ---------- */
+
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+/* Swipeable strip. Snapping and the scrollbar-free look are pure CSS, so
+   the gallery still works with JavaScript switched off. */
+.gallery__viewport {
+    position: relative;
+}
+
+.gallery__stage {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Also smooths the plain anchor jump when the script has not loaded. */
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+.gallery__stage::-webkit-scrollbar {
+    display: none;
+}
+
+.gallery__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    background: var(--surface);
+}
+
+.gallery__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery__counter,
+.gallery__status {
+    position: absolute;
+    z-index: 2;
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--on-dark);
+    pointer-events: none;
+}
+
+.gallery__counter {
+    right: 12px;
+    bottom: 12px;
+    background: color-mix(in srgb, var(--ink) 72%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+
+.gallery__status {
+    left: 12px;
+    top: 12px;
+    background: var(--reserved);
+}
+
+.gallery__status--sold {
+    background: var(--sold);
+}
+
+.gallery__thumbs {
+    display: flex;
+    gap: 8px;
+    padding: 0 var(--page-x);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.gallery__thumbs::-webkit-scrollbar {
+    display: none;
+}
+
+.gallery__thumb {
+    flex: 0 0 auto;
+    width: 74px;
+    aspect-ratio: 4 / 3;
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--surface);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    opacity: 0.55;
+}
+
+.gallery__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery__thumb.is-active {
+    outline-color: var(--ink);
+    opacity: 1;
+}
+
+.gallery__thumb:hover {
+    opacity: 1;
+}
+
+/* ---------- Car page: heading and specs ---------- */
+
+.car__body {
+    padding-top: 22px;
+    padding-bottom: 28px;
+}
+
+.car__head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.car__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(24px, 6.5vw, 30px);
+    line-height: 1.13;
+    letter-spacing: -0.025em;
+    text-wrap: pretty;
+}
+
+.car__subtitle {
+    font-size: 13.5px;
+    color: var(--ink-muted);
+}
+
+.car__price {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 27px;
+    letter-spacing: -0.02em;
+    margin-top: 6px;
+}
+
+.specs {
+    padding-top: 26px;
+}
+
+.specs__heading,
+.about__heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+}
+
+.specs__group + .specs__group {
+    margin-top: 24px;
+}
+
+.specs__group-title {
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+}
+
+.specs__list {
+    margin: 0;
+}
+
+/* A dotted leader ties each label to its value, so the eye can run across
+   the row without the page needing table borders. */
+.specs__row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.specs__row dt {
+    color: var(--ink-muted);
+}
+
+.specs__row dd {
+    margin: 0 0 0 auto;
+    font-weight: 500;
+    text-align: right;
+}
+
+.specs__vin {
+    font-family: ui-monospace, "SF Mono", "Consolas", monospace;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+}
+
+.about {
+    padding-top: 30px;
+}
+
+.about__text {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    max-width: 62ch;
+    text-wrap: pretty;
+}
+
 /* ---------- Empty state ---------- */
 
 .empty {
@@ -414,6 +652,40 @@ a {
 
     .contact-bar .btn--primary {
         flex-grow: 0;
+    }
+
+    /* Past mobile the gallery stops being full-bleed and lines up with the
+       rest of the page. */
+    .gallery {
+        max-width: 1180px;
+        margin: 4px auto 0;
+        padding: 0 var(--page-x);
+        gap: 12px;
+    }
+
+    .gallery__slide {
+        aspect-ratio: 3 / 2;
+        border-radius: var(--r-card);
+        overflow: hidden;
+    }
+
+    .gallery__thumbs {
+        padding: 0;
+    }
+
+    .gallery__thumb {
+        width: 96px;
+    }
+
+    /* Specs and prose read badly at 1180px, so the text column stays narrow
+       while the photos keep the full width. */
+    .car__body {
+        max-width: 760px;
+        padding-top: 30px;
+    }
+
+    .car__price {
+        font-size: 31px;
     }
 }
 

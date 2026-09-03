@@ -12,11 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    {% block body %}
-    {# Default shell, still used by the car page until its own layout task. #}
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
-    {% endblock %}
+    {# Pages lay out their own header, main and footer. #}
+    {% block body %}{% endblock %}
 </body>
 </html>
