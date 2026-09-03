@@ -6,9 +6,11 @@
 
 {% block body %}
 {% if not car.is_published %}
-{# Staff-only preview notice — a real visitor never reaches this page for
-   an unpublished car at all (cars/views.py 404s it), so no styling
-   effort was spent here yet; flag for whoever picks up stage-6 polish. #}
+{% comment %}
+Staff-only preview notice — a real visitor never reaches this page for
+an unpublished car at all (cars/views.py 404s it), so no styling
+effort was spent here yet; flag for whoever picks up stage-6 polish.
+{% endcomment %}
 <div class="container">
     <p class="draft-notice">Черновик — видно только вам, посетители сайта пока не видят эту страницу.</p>
 </div>
@@ -124,9 +126,11 @@
                 {% include 'partials/car_facts.html' %}
 
                 {% if car.video %}
-                {# Plain <video>, not part of the photo gallery/lightbox JS —
-                   styling this properly (its own slide in the gallery?) is
-                   a stage-6 follow-up, not part of this merge. #}
+                {% comment %}
+                Plain <video>, not part of the photo gallery/lightbox JS —
+                styling this properly (its own slide in the gallery?) is
+                a stage-6 follow-up, not part of this merge.
+                {% endcomment %}
                 <section class="section">
                     <h2 class="section__title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 8 5 4-5 4V8Z"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
