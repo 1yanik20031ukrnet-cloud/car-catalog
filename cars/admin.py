@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
@@ -198,7 +199,7 @@ class CarAdmin(ModelAdmin):
             'fields': ['video_preview', 'video'],
         }),
         ('Основное', {
-            'fields': ['dealer', 'brand', 'model', 'year', 'price', 'status'],
+            'fields': ['dealer', 'brand', 'model', 'year', 'price', 'status', 'sold_at'],
         }),
         ('Характеристики', {
             'fields': [
@@ -304,8 +305,25 @@ class CarAdmin(ModelAdmin):
 
     @admin.action(description='Отметить выбранные автомобили проданными')
     def mark_sold(self, request, queryset):
-        updated = queryset.update(status=Car.Status.SOLD)
-        self.message_user(request, f'Продано автомобилей: {updated}')
+        # queryset.update() не вызывает Car.save() (там автопроставление
+        # sold_at), поэтому дату здесь ставим отдельно — и только тем, у
+        # кого её ещё нет. Id считаем заранее, до первого update(): иначе
+        # второй фильтр увидел бы уже обновлённые этим же действием
+        # машины (у них sold_at успел бы стать не пустым) и посчитал бы
+        # их второй раз.
+        without_date = list(
+            queryset.filter(sold_at__isnull=True).values_list('pk', flat=True),
+        )
+        with_date = list(
+            queryset.filter(sold_at__isnull=False).values_list('pk', flat=True),
+        )
+        if without_date:
+            Car.objects.filter(pk__in=without_date).update(
+                status=Car.Status.SOLD, sold_at=timezone.now(),
+            )
+        if with_date:
+            Car.objects.filter(pk__in=with_date).update(status=Car.Status.SOLD)
+        self.message_user(request, f'Продано автомобилей: {len(without_date) + len(with_date)}')
 
     @admin.action(description='Опубликовать выбранные автомобили на сайте')
     def publish_cars(self, request, queryset):

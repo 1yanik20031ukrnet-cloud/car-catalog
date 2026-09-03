@@ -232,3 +232,168 @@ table.formset tbody.form-group:first-of-type .cover-badge {
     object-fit: cover;
     border: 1px solid oklch(37% .045 254);
 }
+
+/* Admin dashboard (main admin page, above the app list) — see
+   cars/templatetags/car_admin_extras.py + templates/cars/admin_stats.html.
+   Plain CSS, no chart library: the "chart" is a row of divs whose
+   height is a percentage computed server-side. */
+.admin-dashboard {
+    margin-bottom: 28px;
+}
+
+.admin-dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.admin-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border: 1px solid oklch(30% .035 255);
+    border-radius: 10px;
+    background: oklch(20% .022 258);
+}
+
+.admin-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: oklch(94% .008 260);
+}
+
+.admin-stat-label {
+    font-size: 13px;
+    color: oklch(70% .01 260);
+}
+
+.admin-stat-card--for-sale .admin-stat-value { color: oklch(72% .12 150); }
+.admin-stat-card--reserved .admin-stat-value { color: oklch(78% .12 85); }
+.admin-stat-card--sold .admin-stat-value { color: oklch(70% .03 255); }
+
+.admin-dashboard-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.admin-dashboard-panel {
+    padding: 16px 18px;
+    border: 1px solid oklch(30% .035 255);
+    border-radius: 10px;
+    background: oklch(20% .022 258);
+}
+
+.admin-dashboard-panel-title {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: oklch(70% .01 260);
+}
+
+.admin-sales-periods dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-sales-period {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.admin-sales-period dt {
+    font-size: 13px;
+    color: oklch(80% .008 260);
+}
+
+.admin-sales-period dd {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: oklch(94% .008 260);
+}
+
+.admin-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    height: 120px;
+}
+
+.admin-chart-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 4px;
+}
+
+.admin-chart-bar-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: oklch(80% .008 260);
+}
+
+.admin-chart-bar {
+    width: 100%;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    background: oklch(52% .13 150 / 80%);
+}
+
+.admin-chart-bar-label {
+    font-size: 11px;
+    color: oklch(60% .01 260);
+    white-space: nowrap;
+}
+
+.admin-dashboard-note {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: oklch(65% .01 260);
+}
+
+/* Compact version of the same counts in the sidebar (every admin
+   page) — templates/admin/app_list.html. Narrow column, so 2x2
+   instead of the dashboard's 1x4, and no labels-only-on-hover tricks:
+   small numbers read fine at this width. */
+.admin-sidebar-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 8px 24px 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid oklch(30% .035 255 / 60%);
+}
+
+.admin-sidebar-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: oklch(94% .008 260);
+}
+
+.admin-sidebar-stat-label {
+    font-size: 11px;
+    color: oklch(65% .01 260);
+}
+
+.admin-sidebar-stat--for-sale .admin-sidebar-stat-value { color: oklch(72% .12 150); }
+.admin-sidebar-stat--reserved .admin-sidebar-stat-value { color: oklch(78% .12 85); }
+.admin-sidebar-stat--sold .admin-sidebar-stat-value { color: oklch(70% .03 255); }

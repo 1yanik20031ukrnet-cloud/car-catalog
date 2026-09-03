@@ -1,0 +1,64 @@
+<div class="admin-dashboard">
+    <div class="admin-dashboard-cards">
+        <div class="admin-stat-card">
+            <span class="admin-stat-value">{{ total }}</span>
+            <span class="admin-stat-label">Всего автомобилей</span>
+        </div>
+        <div class="admin-stat-card admin-stat-card--for-sale">
+            <span class="admin-stat-value">{{ for_sale }}</span>
+            <span class="admin-stat-label">В продаже</span>
+        </div>
+        <div class="admin-stat-card admin-stat-card--reserved">
+            <span class="admin-stat-value">{{ reserved }}</span>
+            <span class="admin-stat-label">Зарезервировано</span>
+        </div>
+        <div class="admin-stat-card admin-stat-card--sold">
+            <span class="admin-stat-value">{{ sold }}</span>
+            <span class="admin-stat-label">Продано</span>
+        </div>
+    </div>
+
+    <div class="admin-dashboard-row">
+        <div class="admin-dashboard-panel admin-sales-periods">
+            <h3 class="admin-dashboard-panel-title">Продажи</h3>
+            <dl>
+                <div class="admin-sales-period">
+                    <dt>За текущий месяц</dt>
+                    <dd>{{ sold_this_month }}</dd>
+                </div>
+                <div class="admin-sales-period">
+                    <dt>За последние 30 дней</dt>
+                    <dd>{{ sold_last_30_days }}</dd>
+                </div>
+                <div class="admin-sales-period">
+                    <dt>За всё время</dt>
+                    <dd>{{ sold_all_time }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="admin-dashboard-panel admin-sales-chart">
+            <h3 class="admin-dashboard-panel-title">Продано по месяцам</h3>
+            {% if chart_data %}
+                <div class="admin-chart-bars">
+                    {% for item in chart_data %}
+                        <div class="admin-chart-bar-col">
+                            <span class="admin-chart-bar-count">{{ item.count }}</span>
+                            <div class="admin-chart-bar" style="height: {{ item.height_pct }}%;"></div>
+                            <span class="admin-chart-bar-label">{{ item.label }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if has_undated_sales %}
+        <p class="admin-dashboard-note">
+            Есть проданные автомобили без даты продажи (проданы до
+            появления этого поля) — они учтены в «Продано» и «За всё
+            время», но не попадают в помесячную статистику и график.
+            Дату можно указать вручную в карточке автомобиля.
+        </p>
+    {% endif %}
+</div>

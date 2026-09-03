@@ -128,6 +128,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Admin theme (django-unfold)
 # https://unfoldadmin.com/docs/
 
+try:
+    ADMIN_OVERRIDES_CSS_VERSION = int(
+        (BASE_DIR / 'static' / 'css' / 'admin-overrides.css').stat().st_mtime,
+    )
+except OSError:
+    ADMIN_OVERRIDES_CSS_VERSION = 0
+
 UNFOLD = {
     'SITE_TITLE': 'Premium Cars — админка',
     'SITE_HEADER': 'Premium Cars',
@@ -154,7 +161,15 @@ UNFOLD = {
     # Приглушаем и цвет текста ошибок (Обязательное поле и т.п.) —
     # у него в теме свой, отдельный от 'primary' насыщенный красный,
     # который отдельным CSS-файлом переопределяется мягче.
-    'STYLES': ['/static/css/admin-overrides.css'],
+    #
+    # ?v=... — cache-busting: без этого браузер может годами отдавать
+    # старую версию файла из кеша при обычном обновлении страницы
+    # (владелец так и увидел серую кнопку «Опубликовать» вместо зелёной
+    # и дашборд без стилей — файл на диске уже новый, но в браузере
+    # лежал старый, 2026-09-03). ADMIN_OVERRIDES_CSS_VERSION ниже —
+    # дата изменения файла на диске, значение в URL меняется само при
+    # правке файла, так что каждая правка получает свежую ссылку.
+    'STYLES': [f'/static/css/admin-overrides.css?v={ADMIN_OVERRIDES_CSS_VERSION}'],
 }
 
 

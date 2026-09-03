@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 MAX_VIDEO_SIZE_MB = 100
@@ -138,6 +139,14 @@ class Car(models.Model):
         'Статус', max_length=10,
         choices=Status.choices, default=Status.FOR_SALE,
     )
+    sold_at = models.DateTimeField(
+        'Дата продажи', null=True, blank=True,
+        help_text='Проставляется автоматически, когда статус впервые '
+                  'становится «Продано» (в том числе через массовое '
+                  'действие «Отметить проданными»). Можно поправить '
+                  'вручную, если дата неточная — при повторном сохранении '
+                  'уже заполненная дата не перезаписывается сама.',
+    )
     video = models.FileField(
         'Видео', upload_to='cars/videos/', blank=True,
         validators=[
@@ -181,6 +190,13 @@ class Car(models.Model):
                 slug = f'{base}-{counter}'
                 counter += 1
             self.slug = slug
+        # Дата продажи проставляется сама только при первом переходе в
+        # «Продано» — если поле уже заполнено (в том числе вручную),
+        # повторное сохранение его не трогает. Действие «Отметить
+        # проданными» в admin.py делает то же самое отдельно, потому что
+        # оно сохраняет через queryset.update() и save() не вызывает.
+        if self.status == self.Status.SOLD and self.sold_at is None:
+            self.sold_at = timezone.now()
         super().save(*args, **kwargs)
 
     @property

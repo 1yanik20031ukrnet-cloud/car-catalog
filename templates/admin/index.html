@@ -1,0 +1,27 @@
+{% extends 'admin/base.html' %}
+{% load i18n car_admin_extras %}
+{% comment %}
+Overrides unfold's own admin/index.html (the admin's main page) — same
+layout, with a small stats dashboard (cars by status, recent sales)
+added above the app list. See cars/templatetags/car_admin_extras.py
+for where the numbers come from. See CLAUDE.md if this needs updating
+after an unfold upgrade changes the original template.
+{% endcomment %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+    {% car_stats_dashboard %}
+
+    <div class="flex flex-col lg:flex-row lg:gap-8">
+        <div class="grow">
+            {% include "unfold/helpers/app_list_default.html" %}
+        </div>
+
+        {% include "unfold/helpers/history.html" %}
+    </div>
+{% endblock %}
