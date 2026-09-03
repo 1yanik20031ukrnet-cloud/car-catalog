@@ -129,8 +129,11 @@ a {
 
 /* ---------- Site header ---------- */
 
+/* One bar on every page: arriving straight on a car from an Instagram
+   link, you should still see whose showroom this is and how to reach it. */
 .site-header {
-    padding: 18px 0 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
 }
 
 .site-header__bar {
@@ -145,6 +148,39 @@ a {
     font-weight: 800;
     font-size: 19px;
     letter-spacing: -0.02em;
+}
+
+.site-header__name:hover {
+    color: var(--accent);
+}
+
+/* ---------- Catalog hero ---------- */
+
+.hero {
+    padding: 22px 0 4px;
+}
+
+.hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(25px, 7vw, 30px);
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+    text-wrap: pretty;
+}
+
+.hero__title em {
+    font-style: normal;
+    color: var(--accent);
+}
+
+.hero__about {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    max-width: 46ch;
+    text-wrap: pretty;
+    margin-top: 10px;
 }
 
 .site-header__links {
@@ -170,30 +206,6 @@ a {
 .icon-btn svg {
     width: 19px;
     height: 19px;
-}
-
-.site-header__lead {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: clamp(25px, 7vw, 30px);
-    line-height: 1.14;
-    letter-spacing: -0.025em;
-    text-wrap: pretty;
-    margin-top: 16px;
-}
-
-.site-header__lead em {
-    font-style: normal;
-    color: var(--accent);
-}
-
-.site-header__about {
-    font-size: 13.5px;
-    line-height: 1.55;
-    color: var(--ink-muted);
-    max-width: 46ch;
-    text-wrap: pretty;
-    margin-top: 10px;
 }
 
 /* ---------- Catalog heading ---------- */
@@ -1339,7 +1351,11 @@ a {
     }
 
     .site-header {
-        padding: 26px 0 30px;
+        padding: 18px 0;
+    }
+
+    .hero {
+        padding: 32px 0 8px;
     }
 
     .catalog-grid {
@@ -1488,9 +1504,8 @@ a {
         gap: 24px;
     }
 
-    .site-header__lead {
+    .hero__title {
         font-size: 44px;
-        max-width: 16ch;
     }
 
     .catalog-grid {

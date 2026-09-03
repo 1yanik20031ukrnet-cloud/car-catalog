@@ -1,0 +1,23 @@
+<header class="site-header">
+    <div class="container site-header__bar">
+        <a class="site-header__name" href="{% url 'cars:catalog' %}">{{ dealer.name }}</a>
+
+        <div class="site-header__links">
+            {% if dealer.phone %}
+            <a class="icon-btn" href="tel:{{ dealer.phone }}" aria-label="Позвонить">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
+            </a>
+            {% endif %}
+            {% if dealer.telegram %}
+            <a class="icon-btn" href="https://t.me/{{ dealer.telegram|cut:'@' }}" aria-label="Telegram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 3.5 2.5 11l7 2.5 2.5 7z"/><path d="m9.5 13.5 4-4"/></svg>
+            </a>
+            {% endif %}
+            {% if dealer.instagram %}
+            <a class="icon-btn" href="{{ dealer.instagram }}" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</header>

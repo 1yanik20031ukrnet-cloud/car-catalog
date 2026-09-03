@@ -4,6 +4,8 @@
 {% block description %}Как {{ dealer.name }} обрабатывает персональные данные посетителей сайта.{% endblock %}
 
 {% block body %}
+{% include 'partials/site_header.html' %}
+
 <div class="container">
     <a class="back-link" href="{% url 'cars:catalog' %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5m6 6-6-6 6-6"/></svg>

@@ -5,6 +5,8 @@
 {% block description %}{{ car.brand }} {{ car.model }} {{ car.year }} — {{ car.mileage_km|spaced }} км, {{ car.get_fuel_display|lower }}, {{ car.price|money:car.dealer.currency }}. {{ car.dealer.name }}.{% endblock %}
 
 {% block body %}
+{% include 'partials/site_header.html' %}
+
 <div class="container">
     <nav class="crumbs" aria-label="Хлебные крошки">
         <ol class="crumbs__list">
