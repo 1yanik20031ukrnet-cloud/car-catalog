@@ -263,10 +263,6 @@ a {
 /* ---------- Filters toggle + panel ----------
    A native <details>/<summary> — opening/closing needs no JS at all,
    which matches how light the rest of the site's scripting is. */
-.filters {
-    position: relative;
-}
-
 .filters__toggle {
     display: flex;
     align-items: center;
@@ -306,22 +302,32 @@ a {
     font-weight: 700;
 }
 
+/* A full-width card in normal flow, sibling to .catalog-bar rather
+   than nested inside the toggle (see catalog.html) — that's what lets
+   it span the whole bar's width instead of just the leftover space
+   next to the sort dropdown. Shown/hidden by :has() below, reacting to
+   the (still nested, JS-free) <details> toggle — same trick already
+   used in admin-overrides.css for the delete-confirmation overlay. */
 .filters__panel {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 12px;
-    padding: 16px;
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px 16px;
+    margin: 0 0 16px;
+    padding: 18px;
     border: 1px solid var(--line);
     border-radius: var(--r-card);
-    background: var(--bg);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+    background: var(--surface);
+}
+
+.catalog-bar-wrap:has(.filters[open]) .filters__panel {
+    display: grid;
 }
 
 .filters__field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .filters__label {
@@ -343,9 +349,16 @@ a {
     min-width: 0;
 }
 
+/* Price/year need two inputs side by side, so they get a wider cell
+   than a single-value field like brand or mileage. */
+.filters__field--range {
+    grid-column: span 2;
+}
+
 .filters__actions {
     display: flex;
     gap: 10px;
+    grid-column: 1 / -1;
     margin-top: 2px;
 }
 
@@ -1452,16 +1465,6 @@ a {
     .catalog-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 30px 20px;
-    }
-
-    /* Past mobile the filter panel stops pushing the grid down and
-       floats as a popover under its toggle instead. */
-    .filters__panel {
-        position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        z-index: 5;
-        width: 320px;
     }
 
     .car-card__title {

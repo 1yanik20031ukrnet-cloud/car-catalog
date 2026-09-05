@@ -1,4 +1,4 @@
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 
 from . import filters as car_filters
@@ -43,6 +43,18 @@ def catalog(request):
         'filters': active_filters,
         'active_filter_count': len(active_filters),
     })
+
+
+def filter_count(request):
+    """How many cars the filter fields currently in the form would
+    match — same filter_cars() as catalog(), just returns a number
+    instead of a page. static/js/filters.js calls this as the visitor
+    changes a field, so "Показать N" updates live instead of only
+    after they submit the form.
+    """
+    cars = Car.objects.filter(is_published=True)
+    cars, _active_filters, _sort = car_filters.filter_cars(cars, request.GET)
+    return JsonResponse({'count': cars.count()})
 
 
 def car_detail(request, slug):
