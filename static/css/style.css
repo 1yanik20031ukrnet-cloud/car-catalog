@@ -141,10 +141,21 @@ a {
 }
 
 .site-header__name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--font-display);
     font-weight: 800;
     font-size: 19px;
     letter-spacing: -0.02em;
+}
+
+.site-header__logo {
+    display: block;
+    height: 28px;
+    width: auto;
+    max-width: 120px;
+    object-fit: contain;
 }
 
 .site-header__links {
@@ -1363,11 +1374,22 @@ a {
 }
 
 .site-footer__name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 16px;
     letter-spacing: -0.02em;
     color: var(--ink);
+}
+
+.site-footer__logo {
+    display: block;
+    height: 24px;
+    width: auto;
+    max-width: 110px;
+    object-fit: contain;
 }
 
 .site-footer__about {
@@ -1639,6 +1661,90 @@ a {
     width: 100%;
     border-radius: var(--r-card);
     background: var(--surface);
+}
+
+/* Booking form (Этап 4, Ян) — same deal: reuses chip-field/.btn as-is,
+   "вид формы и сообщение об успехе" is feature/booking-ui's job. */
+.booking-section__toggle {
+    cursor: pointer;
+    list-style: none; /* Firefox's own disclosure triangle */
+}
+
+.booking-section__toggle::-webkit-details-marker {
+    display: none; /* Chrome/Safari's own disclosure triangle */
+}
+
+.booking-section > div {
+    margin-top: 4px;
+}
+
+.booking-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px 16px;
+}
+
+.booking-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.booking-form__field--wide {
+    grid-column: 1 / -1;
+}
+
+.booking-form .chip-field {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chip-field--textarea {
+    height: auto;
+    min-height: 90px;
+    padding: 12px 14px;
+    border-radius: var(--r-card);
+    line-height: 1.4;
+    resize: vertical;
+}
+
+.booking-form__submit {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.booking-message {
+    padding: 10px 14px;
+    border-radius: var(--r-card);
+    background: var(--surface);
+    color: var(--ink-muted);
+    font-size: 14px;
+}
+
+.booking-message--success {
+    background: var(--reserved);
+    color: var(--on-dark);
+    font-weight: 500;
+}
+
+.booking-form .errorlist {
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--reserved);
+    font-size: 12px;
+}
+
+/* Honeypot (cars/forms.py BookingForm.website) — visually off-screen,
+   not display:none, so a simple bot that skips display:none fields
+   still finds and fills it. Real visitors never see or reach it
+   (also tabindex="-1" in the widget attrs). */
+.booking-form__honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }
 
 /* ---------- Motion ---------- */

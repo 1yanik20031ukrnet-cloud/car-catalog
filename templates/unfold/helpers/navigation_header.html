@@ -1,0 +1,36 @@
+{% load unfold car_admin_extras %}
+{% comment %}
+Overrides unfold's own unfold/helpers/navigation_header.html (top of
+the sidebar) — same outer bar, same original layout (icon square +
+name beside it), but the icon itself comes from
+{% dealer_branding %} (templates/cars/admin_dealer_branding.html):
+Unfold's generic car icon by default, swapped for the salon's own
+uploaded logo (cropped square) the moment one is uploaded — no
+template change needed at that point (owner's request, 2026-09-06;
+an earlier two-line/logo-above-name version didn't look good and was
+reverted the same day). See CLAUDE.md if this needs updating after an
+unfold upgrade changes the original template.
+{% endcomment %}
+
+<div class="border-b border-base-200 flex gap-3 items-center h-[65px] mb-4 dark:border-base-800 px-3 {% element_classes 'navigation_header' %}">
+    <div class="bg-transparent flex font-semibold gap-3 grow min-w-0 h-[64px] items-center px-3 {% if site_dropdown %}cursor-pointer -mx-3 px-6 hover:bg-base-100 dark:hover:bg-white/[.06]{% endif %}"
+         {% if site_dropdown %}
+             x-on:click="siteDropdownOpen = !siteDropdownOpen"
+             x-bind:class="{'bg-base-100 dark:bg-white/[.06]': siteDropdownOpen, 'bg-transparent': !siteDropdownOpen}"
+         {% endif %}
+    >
+        {% dealer_branding %}
+
+        {% if site_dropdown %}
+            <span class="material-symbols-outlined ml-auto select-none text-font-default-light dark:text-font-default-dark">
+                unfold_more
+            </span>
+        {% endif %}
+    </div>
+
+    <span class="material-symbols-outlined block cursor-pointer h-[18px] xl:hidden! hover:text-base-700 dark:hover:text-base-200" x-on:click="sidebarToggle()">
+        close
+    </span>
+
+    {% include "unfold/helpers/site_dropdown.html" %}
+</div>

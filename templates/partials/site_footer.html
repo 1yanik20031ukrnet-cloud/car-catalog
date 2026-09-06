@@ -1,7 +1,12 @@
 <footer class="site-footer">
     <div class="container site-footer__inner">
         <div class="site-footer__brand">
-            <div class="site-footer__name">{{ dealer.name }}</div>
+            <div class="site-footer__name">
+                {% if dealer.logo %}
+                <img src="{{ dealer.logo.url }}" alt="{{ dealer.name }}" class="site-footer__logo">
+                {% endif %}
+                {{ dealer.name }}
+            </div>
             {% if dealer.description %}
             <p class="site-footer__about">{{ dealer.description }}</p>
             {% endif %}

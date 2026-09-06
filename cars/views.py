@@ -1,8 +1,18 @@
+from django.core.cache import cache
 from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from . import filters as car_filters
+from .forms import BookingForm
 from .models import Car, Dealer
+
+# Простая защита от спама поверх honeypot-поля в самой форме: с одного
+# IP — не чаще одной заявки в этот промежуток, неважно на какую машину.
+# Через cache (по умолчанию — LocMemCache, ничего дополнительно
+# настраивать не нужно). На нескольких процессах/серверах счётчик не
+# общий — для одного сайта на одном сервере этого достаточно, если
+# станет мало — тогда переходить на Redis и т.п.
+BOOKING_THROTTLE_SECONDS = 60
 
 
 def catalog(request):
@@ -75,9 +85,34 @@ def car_detail(request, slug):
     )
     if not car.is_published and not request.user.is_staff:
         raise Http404('Автомобиль ещё не опубликован')
+
+    # A sold car doesn't take new viewing requests — the form below just
+    # isn't offered for one (see the template), so a POST for a sold car
+    # only happens if someone crafts the request by hand; still validated
+    # normally rather than trusted blindly.
+    if request.method == 'POST' and car.status != Car.Status.SOLD:
+        booking_form = BookingForm(request.POST)
+        throttle_key = f'booking-throttle-{request.META.get("REMOTE_ADDR")}'
+        if cache.get(throttle_key):
+            booking_form.add_error(
+                None, 'Слишком много заявок подряд — подождите минуту и попробуйте снова.',
+            )
+        elif booking_form.is_valid():
+            booking = booking_form.save(commit=False)
+            booking.car = car
+            booking.save()
+            cache.set(throttle_key, True, BOOKING_THROTTLE_SECONDS)
+            # Redirect-after-POST so refreshing the result page never
+            # re-submits the same booking a second time.
+            return redirect(f'{car.get_absolute_url()}?booked=1')
+    else:
+        booking_form = BookingForm()
+
     return render(request, 'cars/car_detail.html', {
         'car': car,
         'dealer': car.dealer,
+        'booking_form': booking_form,
+        'booking_success': request.GET.get('booked') == '1',
     })
 
 

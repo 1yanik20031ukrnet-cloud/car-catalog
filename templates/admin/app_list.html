@@ -8,14 +8,30 @@ same layout, plus two additions:
 - a compact car-count widget above the app list (owner's request,
   2026-09-03) — same numbers as the dashboard on the main admin page
   (templates/cars/admin_stats.html), but visible on every admin page
-  since the sidebar is always there, not just the main one.
+  since the sidebar is always there, not just the main one. Styled as
+  its own row, matching a model link like "Автомобили" exactly (same
+  markup shape as one real app section below, just with one row
+  instead of a model list) rather than a distinct-looking block —
+  owner's request, 2026-09-06. Still a <details>/<summary> toggle,
+  collapsed by default, no JS.
 See CLAUDE.md if this needs updating after an unfold upgrade changes
 the original template.
 {% endcomment %}
 
 {% if app_list %}
     <div id="nav-sidebar-apps" class="h-0 grow overflow-auto scrollbar-default-hover">
-        {% car_stats_sidebar %}
+        <div class="app-stats module">
+            <ol class="px-6">
+                <li>
+                    <details class="admin-sidebar-stats-toggle">
+                        <summary class="flex items-center -mx-3 px-3 h-[38px] rounded-default truncate hover:text-primary-600 dark:hover:text-primary-500">
+                            Статистика
+                        </summary>
+                        {% car_stats_sidebar %}
+                    </details>
+                </li>
+            </ol>
+        </div>
 
         {% for app in app_list %}
             <div class="app-{{ app.app_label }} module{% if app.app_url in request.path %} current-app{% endif %}">

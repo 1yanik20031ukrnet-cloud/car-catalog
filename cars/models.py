@@ -36,6 +36,13 @@ class Dealer(models.Model):
         PLN = 'zł', 'zł (злотый)'
 
     name = models.CharField('Название', max_length=100)
+    logo = models.ImageField(
+        'Логотип', upload_to='dealer/', blank=True,
+        help_text='Необязательно. Пока пусто — в шапке сайта и админке '
+                  'показывается текстовое название салона, как сейчас. '
+                  'Лучше всего смотрится квадратное изображение — в '
+                  'админке логотип показывается в квадратной иконке.',
+    )
     description = models.TextField('Короткое описание', blank=True)
     phone = models.CharField('Телефон', max_length=30)
     instagram = models.URLField('Ссылка на Instagram', blank=True)

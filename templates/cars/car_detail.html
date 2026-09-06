@@ -186,6 +186,78 @@ effort was spent here yet; flag for whoever picks up stage-6 polish.
                         </div>
                     </div>
                 </section>
+
+                {% comment %}
+                Backend-side stub, same deal as .draft-notice/.car-video below —
+                reuses existing tokens (chip-field, .btn, .section) rather than
+                getting real design attention. "Вид формы и сообщение об успехе"
+                is a separate task (feature/booking-ui) — restyle freely, nothing
+                else depends on these class names.
+
+                <details>/<summary>, same zero-JS accordion as the catalog's
+                "Фильтры" — open by default only when there's something the
+                visitor needs to see right away (a validation error, or the
+                success message after a redirect). The "Записаться на
+                просмотр" link in the aside below points at #booking, which
+                sits *inside* this <details> (not on the <details> itself) —
+                that's what makes the browser auto-open it and scroll down
+                when the link is clicked, with no JS for that either.
+                {% endcomment %}
+                <details class="section booking-section"{% if booking_success or booking_form.errors %} open{% endif %}>
+                    <summary class="section__title booking-section__toggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+                        Записаться на просмотр
+                    </summary>
+
+                    <div id="booking">
+                        {% if booking_success %}
+                        <p class="booking-message booking-message--success">Заявка отправлена! Мы свяжемся с вами, чтобы согласовать время.</p>
+                        {% endif %}
+
+                        {% if car.status == 'sold' %}
+                        <p class="booking-message">Этот автомобиль уже продан — новые заявки на просмотр не принимаются.</p>
+                        {% else %}
+                        <form method="post" class="booking-form" novalidate>
+                            {% csrf_token %}
+                            {# Honeypot — invisible to a real visitor, see cars/forms.py. #}
+                            {{ booking_form.website }}
+                            {% if booking_form.non_field_errors %}
+                            <p class="booking-form__field--wide">{{ booking_form.non_field_errors }}</p>
+                            {% endif %}
+                            <label class="booking-form__field">
+                                <span class="filters__label">Ваше имя</span>
+                                {{ booking_form.name }}
+                                {{ booking_form.name.errors }}
+                            </label>
+                            <label class="booking-form__field">
+                                <span class="filters__label">Телефон</span>
+                                {{ booking_form.phone }}
+                                {{ booking_form.phone.errors }}
+                            </label>
+                            <label class="booking-form__field">
+                                <span class="filters__label">Дата просмотра</span>
+                                {{ booking_form.date }}
+                                {{ booking_form.date.errors }}
+                            </label>
+                            <div class="booking-form__field">
+                                <span class="filters__label">Желаемое время</span>
+                                <span class="filters__range">
+                                    {{ booking_form.preferred_hour }}
+                                    {{ booking_form.preferred_minute }}
+                                </span>
+                                {{ booking_form.preferred_hour.errors }}
+                                {{ booking_form.preferred_minute.errors }}
+                            </div>
+                            <label class="booking-form__field booking-form__field--wide">
+                                <span class="filters__label">Комментарий</span>
+                                {{ booking_form.comment }}
+                            </label>
+
+                            <button type="submit" class="btn btn--primary booking-form__submit">Отправить заявку</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </details>
             </div>
 
             <aside class="car__aside" aria-label="Цена и контакты">
@@ -209,6 +281,12 @@ effort was spent here yet; flag for whoever picks up stage-6 polish.
                         <a class="btn btn--ghost" href="tel:{{ car.dealer.phone }}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4 5.2 2 2 0 0 1 6 3z"/></svg>
                             {{ car.dealer.phone }}
+                        </a>
+                        {% endif %}
+                        {% if car.status != 'sold' %}
+                        <a class="btn btn--ghost" href="#booking">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+                            Записаться на просмотр
                         </a>
                         {% endif %}
                     </div>

@@ -117,6 +117,22 @@ class CarAdminForm(forms.ModelForm):
 @admin.register(Dealer)
 class DealerAdmin(ModelAdmin):
     list_display = ['name', 'phone', 'currency']
+    readonly_fields = ['logo_preview']
+    fields = [
+        'name', 'logo_preview', 'logo', 'description', 'phone',
+        'instagram', 'telegram', 'whatsapp',
+        'currency', 'secondary_currency', 'exchange_rate',
+    ]
+
+    @admin.display(description='Текущий логотип')
+    def logo_preview(self, obj):
+        if not obj.logo:
+            return 'Логотип ещё не загружен — в шапке сайта показывается название.'
+        return format_html(
+            '<img src="{}" style="max-width:180px;max-height:90px;'
+            'border-radius:6px;display:block;background:#fff;padding:8px;">',
+            obj.logo.url,
+        )
 
 
 class CarImageInlineForm(forms.ModelForm):
@@ -338,7 +354,14 @@ class CarAdmin(ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(ModelAdmin):
-    list_display = ['name', 'phone', 'car', 'date', 'preferred_time', 'created_at']
+    list_display = ['name', 'phone', 'car_link', 'date', 'preferred_time', 'created_at']
     list_filter = ['date']
     search_fields = ['name', 'phone']
     readonly_fields = ['created_at']
+
+    @admin.display(description='Автомобиль', ordering='car')
+    def car_link(self, obj):
+        """Прямая ссылка на карточку машины в админке — чтобы не искать
+        вручную, какую именно машину показывать по этой заявке."""
+        url = reverse('admin:cars_car_change', args=[obj.car_id])
+        return format_html('<a href="{}">{}</a>', url, obj.car)

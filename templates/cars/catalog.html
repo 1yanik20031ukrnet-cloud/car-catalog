@@ -5,7 +5,12 @@
 <header class="site-header">
     <div class="container">
         <div class="site-header__bar">
-            <div class="site-header__name">{{ dealer.name }}</div>
+            <div class="site-header__name">
+                {% if dealer.logo %}
+                <img src="{{ dealer.logo.url }}" alt="{{ dealer.name }}" class="site-header__logo">
+                {% endif %}
+                {{ dealer.name }}
+            </div>
             <div class="site-header__links">
                 {% if dealer.phone %}
                 <a class="icon-btn" href="tel:{{ dealer.phone }}" aria-label="Позвонить">

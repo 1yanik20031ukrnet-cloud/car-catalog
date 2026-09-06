@@ -397,3 +397,23 @@ table.formset tbody.form-group:first-of-type .cover-badge {
 .admin-sidebar-stat--for-sale .admin-sidebar-stat-value { color: oklch(72% .12 150); }
 .admin-sidebar-stat--reserved .admin-sidebar-stat-value { color: oklch(78% .12 85); }
 .admin-sidebar-stat--sold .admin-sidebar-stat-value { color: oklch(70% .03 255); }
+
+/* Collapsed-by-default <details> wrapping the sidebar stats widget
+   above (templates/admin/app_list.html) — hides the native disclosure
+   triangle since the summary text itself is the toggle. */
+.admin-sidebar-stats-toggle > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.admin-sidebar-stats-toggle > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Dealer logo in the sidebar header (templates/unfold/helpers/
+   navigation_header.html + cars/admin_dealer_branding.html) — no
+   custom CSS needed: that partial reuses Unfold's own Tailwind
+   classes for the icon square (same shape as the original car icon),
+   just swapping in <img> + object-cover when dealer.logo is set. A
+   two-line/logo-above-name version was tried and reverted the same
+   day (owner: "не оч красиво") — kept simple instead. */

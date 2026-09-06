@@ -4,9 +4,17 @@ from django import template
 from django.db.models import Count
 from django.utils import timezone
 
-from cars.models import Car
+from cars.models import Car, Dealer
 
 register = template.Library()
+
+
+@register.inclusion_tag('cars/admin_dealer_branding.html')
+def dealer_branding():
+    """Логотип/название салона в шапке сайдбара админки, вместо
+    стандартной иконки Unfold (owner's request, 2026-09-06) — на
+    каждой странице админки, так же как car_stats_sidebar ниже."""
+    return {'dealer': Dealer.objects.first()}
 
 
 def _month_starts(count, today):
