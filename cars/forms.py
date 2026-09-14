@@ -14,19 +14,33 @@ BOOKING_HOURS_START = datetime.time(8, 0)
 BOOKING_HOURS_END = datetime.time(20, 0)
 BOOKING_TIME_STEP_MINUTES = 15
 
+# Что подставляется в форму, пока посетитель ничего не выбрал
+# (2026-09-14, по просьбе владельца). Смысл: пустая форма — лишний шаг;
+# человеку проще поправить готовое время, чем выбрать его с нуля.
+# Заявка без времени раньше проходила насквозь, теперь время
+# обязательно — поэтому значение по умолчанию должно быть разумным.
+BOOKING_DEFAULT_TIME = datetime.time(9, 0)
+# Завтра, а не сегодня: салону нужно время перезвонить и подтвердить,
+# а «сегодня через час» чаще всего нереалистично.
+BOOKING_DEFAULT_DAYS_AHEAD = 1
+
 
 def _hour_choices():
-    """'' + каждый рабочий час, "08".."20"."""
-    return [('', 'Час')] + [
+    """Каждый рабочий час, "08".."20"."""
+    return [
         (f'{h:02d}', f'{h:02d}') for h in range(BOOKING_HOURS_START.hour, BOOKING_HOURS_END.hour + 1)
     ]
 
 
 def _minute_choices():
-    """'' + минуты с шагом BOOKING_TIME_STEP_MINUTES, "00".."45"."""
-    return [('', 'Мин')] + [
+    """Минуты с шагом BOOKING_TIME_STEP_MINUTES, "00".."45"."""
+    return [
         (f'{m:02d}', f'{m:02d}') for m in range(0, 60, BOOKING_TIME_STEP_MINUTES)
     ]
+
+
+def default_booking_date():
+    return timezone.localdate() + datetime.timedelta(days=BOOKING_DEFAULT_DAYS_AHEAD)
 
 
 class BookingForm(forms.ModelForm):
@@ -50,12 +64,21 @@ class BookingForm(forms.ModelForm):
     # особенность самого HTML, не баг) — реально можно было прокрутить
     # и выбрать время вне рабочих часов. Обычные <select> с готовым
     # списком физически не дают выбрать ничего другого.
+    #
+    # Оба поля обязательны и заполнены заранее (2026-09-14). Раньше они
+    # были необязательными, и заявка спокойно уходила вообще без
+    # времени — салон получал «приеду посмотреть» без часа.
+    # Пустых вариантов «Час»/«Мин» в списках больше нет: выбрать
+    # «ничего» физически нельзя, поэтому и проверять этот случай не
+    # нужно.
     preferred_hour = forms.ChoiceField(
-        required=False, label='Час', choices=_hour_choices,
+        label='Час', choices=_hour_choices,
+        initial=f'{BOOKING_DEFAULT_TIME.hour:02d}',
         widget=forms.Select(attrs={'class': 'chip-field chip-field--select'}),
     )
     preferred_minute = forms.ChoiceField(
-        required=False, label='Минуты', choices=_minute_choices,
+        label='Минуты', choices=_minute_choices,
+        initial=f'{BOOKING_DEFAULT_TIME.minute:02d}',
         widget=forms.Select(attrs={'class': 'chip-field chip-field--select'}),
     )
 
@@ -86,7 +109,19 @@ class BookingForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={
                 'class': 'chip-field', 'type': 'tel', 'placeholder': '+380 XX XXX XX XX',
             }),
-            'date': forms.DateInput(attrs={'class': 'chip-field', 'type': 'date'}),
+            # min не даёт выбрать прошедший день прямо в календаре —
+            # clean_date() всё равно проверяет это на сервере, но
+            # приятнее не давать ошибиться, чем ругаться после отправки.
+            #
+            # format обязателен. У проекта LANGUAGE_CODE='ru', и без
+            # него Django подставляет дату по-русски — value="15.09.2026".
+            # <input type="date"> понимает только ISO (ГГГГ-ММ-ДД) и
+            # любое другое значение молча выбрасывает, из-за чего поле
+            # выглядит пустым, хотя дата в форму передана.
+            'date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={'class': 'chip-field', 'type': 'date'},
+            ),
             'comment': forms.Textarea(attrs={
                 'class': 'chip-field chip-field--textarea',
                 'rows': 3,
@@ -94,31 +129,40 @@ class BookingForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Дата по умолчанию — завтра, и календарь не предлагает прошлое.
+        # Ставится здесь, а не в поле модели: значение зависит от того,
+        # какой сегодня день, то есть считается при каждом показе формы.
+        #
+        # Именно в self.initial, а не в self.fields['date'].initial:
+        # ModelForm заполняет self.initial из самого объекта, и для
+        # новой заявки туда попадает date=None, который перебивает
+        # значение по умолчанию у поля — дата так и осталась бы пустой.
+        if not self.initial.get('date'):
+            self.initial['date'] = default_booking_date()
+        self.fields['date'].widget.attrs['min'] = timezone.localdate().isoformat()
+
     def clean(self):
         cleaned = super().clean()
         hour = cleaned.get('preferred_hour')
         minute = cleaned.get('preferred_minute')
+        # Рабочий день заканчивается ровно в BOOKING_HOURS_END —
+        # "20:30" уже нерабочее время, хотя оба select'а сами по себе
+        # предлагают только допустимые часы/минуты по отдельности.
         if hour and minute:
-            # Рабочий день заканчивается ровно в BOOKING_HOURS_END —
-            # "20:30" уже нерабочее время, хотя оба select'а сами по
-            # себе предлагают только допустимые часы/минуты по отдельности.
             if hour == f'{BOOKING_HOURS_END.hour:02d}' and minute != '00':
                 self.add_error(
                     'preferred_minute',
                     f'Салон закрывается в {BOOKING_HOURS_END:%H:%M} — выберите время раньше.',
                 )
-        elif hour or minute:
-            self.add_error(
-                'preferred_minute' if hour else 'preferred_hour',
-                'Укажите и час, и минуты — или оставьте оба поля пустыми.',
-            )
         return cleaned
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        hour = self.cleaned_data.get('preferred_hour')
-        minute = self.cleaned_data.get('preferred_minute')
-        instance.preferred_time = f'{hour}:{minute}' if hour and minute else ''
+        hour = self.cleaned_data['preferred_hour']
+        minute = self.cleaned_data['preferred_minute']
+        instance.preferred_time = f'{hour}:{minute}'
         if commit:
             instance.save()
         return instance
