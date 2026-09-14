@@ -10,22 +10,122 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+# --------------------------------------------------------------------------
+# Настройки из окружения
+#
+# Всё, что отличается между «у нас на ноутбуке» и «на боевом сервере»,
+# берётся из переменных окружения, а не правится в этом файле. Файла
+# settings.py по-прежнему один: раздваивать его на dev/prod для проекта
+# такого размера — лишняя сложность.
+#
+# Локально значения удобно держать в файле .env рядом с manage.py
+# (он в .gitignore и в репозиторий не попадает). Образец — .env.example.
+# Свой мини-парсер, чтобы не тащить ради пяти строк зависимость:
+# настоящее окружение всегда главнее файла.
+# --------------------------------------------------------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3m7x#2q)nx+e8182sr4zcx@y#!m0*bap(rdw2!xgy7qi=u-qwe'
+def _load_dotenv(path):
+    """Читает KEY=value из .env, не перезаписывая уже заданное окружение."""
+    try:
+        lines = path.read_text(encoding='utf-8').splitlines()
+    except OSError:
+        return
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, _, value = line.partition('=')
+        os.environ.setdefault(key.strip(), value.strip().strip('"\''))
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+_load_dotenv(BASE_DIR / '.env')
+
+
+def env_bool(name, default):
+    """'1', 'true', 'yes', 'on' (в любом регистре) → True."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def env_list(name, default=()):
+    """'example.com, www.example.com' → ['example.com', 'www.example.com']."""
+    value = os.environ.get(name)
+    if not value:
+        return list(default)
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
+# DEBUG по умолчанию включён — чтобы у обоих разработчиков всё
+# работало как раньше, без .env и без лишних действий. На боевом
+# сервере он выключается переменной DJANGO_DEBUG=0.
+DEBUG = env_bool('DJANGO_DEBUG', True)
+
+# Ключ, которым Django подписывает сессии и формы.
+# Старый ключ лежал прямо здесь и уехал в публичный репозиторий, то есть
+# считается скомпрометированным — для боевого сервера нужно сгенерировать
+# новый и положить в DJANGO_SECRET_KEY. Ключ ниже остаётся только для
+# локальной разработки и намеренно помечен как небезопасный.
+DEV_SECRET_KEY = 'django-insecure-local-only-do-not-use-in-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or DEV_SECRET_KEY
+
+if not DEBUG and SECRET_KEY == DEV_SECRET_KEY:
+    # Лучше не запуститься совсем, чем тихо работать в проде с ключом,
+    # который лежит в открытом репозитории.
+    raise ImproperlyConfigured(
+        'DJANGO_DEBUG=0, но DJANGO_SECRET_KEY не задан. Сгенерируйте новый '
+        'ключ и положите его в переменные окружения — см. .env.example.'
+    )
+
+# Домены, с которых сайт отвечает. Локально — сам себе, на боевом
+# задаётся через DJANGO_ALLOWED_HOSTS=example.com,www.example.com
+ALLOWED_HOSTS = env_list(
+    'DJANGO_ALLOWED_HOSTS',
+    ['localhost', '127.0.0.1', '[::1]'] if DEBUG else [],
+)
+
+# Нужно, когда сайт работает по https за чужим прокси: без этого
+# отправка форм (в том числе заявки на просмотр) отвалится по CSRF.
+# Значения — со схемой: https://example.com
+CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+
+# Настройки https. Включаются одной переменной DJANGO_SECURE_SSL=1 на
+# боевом сервере — чтобы при переезде не пришлось править код.
+#
+# Локально по умолчанию выключены: без сертификата сайт с ними просто
+# перестанет открываться (браузер будет бесконечно перебрасывать на
+# https://localhost, которого нет).
+#
+# ВАЖНО: включать только когда сертификат уже работает и сайт реально
+# открывается по https. Иначе можно остаться без доступа к собственному
+# сайту — особенно из-за HSTS: браузер запоминает «сюда только по https»
+# на указанный срок и не даст вернуться обратно.
+SECURE_SSL = env_bool('DJANGO_SECURE_SSL', False)
+
+if SECURE_SSL:
+    # Перебрасывать http → https.
+    SECURE_SSL_REDIRECT = True
+    # Куки сессии и CSRF передавать только по шифрованному соединению,
+    # чтобы их нельзя было перехватить в открытой сети.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Django стоит за прокси (nginx и т.п.), и о том, что исходный
+    # запрос был по https, узнаёт из этого заголовка.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # HSTS: сколько секунд браузер помнит «этот сайт только по https».
+    # Начинать стоит с маленького значения (например, 3600 — час) и
+    # поднимать до года, только убедившись, что всё работает.
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS', '0'))
 
 
 # Application definition
@@ -119,6 +219,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Куда `manage.py collectstatic` складывает все файлы стилей и скриптов
+# (наши из static/ плюс файлы админки и темы unfold) — на боевом сервере
+# их отдаёт не Django, а веб-сервер, и он берёт их отсюда. Локально
+# папка не нужна и в репозиторий не попадает.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Uploaded files (car photos)
 MEDIA_URL = 'media/'
